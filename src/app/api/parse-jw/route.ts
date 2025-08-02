@@ -230,7 +230,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ParseJWRe
       );
 
       if (isQuestion) {
-        return `Question: ${number}. ${text}`;
+        return `Frage: ${number}. ${text}`;
       } else if (isParagraphRef) {
         return `Absatz: ${number}. ${text}`;
       }

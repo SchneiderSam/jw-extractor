@@ -9,11 +9,11 @@ import {
   Container, 
   Flex, 
   Heading,
-  Card,
   Callout
 } from '@radix-ui/themes';
 import { SymbolIcon, CopyIcon, ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 interface ParseJWResponse {
@@ -93,10 +93,10 @@ export default function WTExtractorPage() {
       <Flex gap="6" direction={{ initial: 'column', md: 'row' }} style={{ minHeight: '70vh' }}>
         {/* Left Column - URL Input */}
         <Box style={{ flex: '1' }}>
-          <Card style={{ height: '100%', padding: '1rem' }}>
-            <Box mb="3">
-              <Flex align="center" gap="2" mb="3">
-                <Heading size="4">JW.org URL</Heading>
+          <Card className="h-full">
+            <CardHeader>
+              <Flex align="center" gap="2">
+                <CardTitle>JW.org URL</CardTitle>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <InfoCircledIcon style={{ color: 'var(--gray-9)', cursor: 'help' }} />
@@ -106,7 +106,7 @@ export default function WTExtractorPage() {
                       <p><strong>Content will be converted with proper formatting:</strong></p>
                       <ul style={{ marginTop: '8px', paddingLeft: '16px' }}>
                         <li>h1 → # Hauptthema, h2 → ## Unterthema</li>
-                        <li>Questions → "Question: 6. Was können wir lernen?"</li>
+                        <li>Questions → "Frage: 6. Was können wir lernen?"</li>
                         <li>Paragraphs → "Absatz: 1. Der erste Punkt erklärt..."</li>
                         <li>Study prompts like "Deine Antwort" will be filtered out</li>
                       </ul>
@@ -114,10 +114,11 @@ export default function WTExtractorPage() {
                   </TooltipContent>
                 </Tooltip>
               </Flex>
-              <p style={{ color: 'var(--gray-11)', fontSize: '14px', marginBottom: '1rem' }}>
+              <p style={{ color: 'var(--gray-11)', fontSize: '14px' }}>
                 Enter a JW.org URL (e.g., https://wol.jw.org/de/wol/d/r10/lp-x/2025403)
               </p>
-            </Box>
+            </CardHeader>
+            <CardContent>
             
             <Flex direction="column" gap="3">
               <TextField.Root
@@ -154,16 +155,18 @@ export default function WTExtractorPage() {
                 </Callout.Root>
               )}
             </Flex>
+            </CardContent>
           </Card>
         </Box>
 
         {/* Right Column - Markdown Output */}
         <Box style={{ flex: '1' }}>
-          <Card style={{ height: '100%', padding: '1rem' }}>
-            <Box mb="3">
-              <Heading size="4" mb="3">Markdown Output</Heading>
-            </Box>
-            <Flex direction="column" gap="3" style={{ height: 'calc(100% - 100px)' }}>
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>Markdown Output</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Flex direction="column" gap="3" style={{ height: 'calc(100vh - 300px)' }}>
               <TextArea
                 size="3"
                 placeholder="Extracted markdown content will appear here..."
@@ -173,7 +176,9 @@ export default function WTExtractorPage() {
                   minHeight: '400px',
                   flex: '1',
                   resize: 'vertical',
-                  fontFamily: 'monospace'
+                  fontFamily: 'monospace',
+                  backgroundColor: 'var(--gray-2)',
+                  border: '1px solid var(--gray-6)'
                 }}
                 readOnly={isLoading}
               />
@@ -193,7 +198,8 @@ export default function WTExtractorPage() {
                   <p>Copy the formatted markdown content to clipboard</p>
                 </TooltipContent>
               </Tooltip>
-            </Flex>
+              </Flex>
+            </CardContent>
           </Card>
         </Box>
       </Flex>
