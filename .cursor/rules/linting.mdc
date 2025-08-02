@@ -1,0 +1,24 @@
+---
+alwaysApply: true
+---
+# Code Quality and Formatting
+
+## ESLint
+ESLint configuration is defined in [eslint.config.mjs](mdc:eslint.config.mjs). Follow these guidelines:
+
+- Fix all ESLint warnings and errors before committing
+- No console.log statements in production code
+- Use optional chaining (?.) for nullable objects
+- Use nullish coalescing (??) for null/undefined fallbacks
+- Maintain consistent import ordering
+- Use named exports over default exports
+- Keep files under 400 lines of code
+- Maximum line length is 100 characters
+
+## Code Organization
+- One component per file
+- Group related components in feature directories
+- Keep components pure when possible
+- Extract complex logic into custom hooks
+- Use meaningful variable and function names
+- Add JSDoc comments for complex functions

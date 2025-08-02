@@ -1,0 +1,14 @@
+---
+globs: *.css,*.scss,*.module.css,*.module.scss
+---
+# Styling Guidelines
+
+- Use CSS Modules for component-specific styles
+- Global styles should only be defined in [src/app/globals.css](mdc:src/app/globals.css)
+- Follow BEM naming convention for class names
+- Use CSS variables for theme values (colors, spacing, etc.)
+- Prefer relative units (rem, em) over fixed units (px)
+- Use flexbox and grid for layouts
+- Maintain mobile-first responsive design
+- Keep specificity low by avoiding deep nesting
+- Use PostCSS features as configured in [postcss.config.mjs](mdc:postcss.config.mjs)

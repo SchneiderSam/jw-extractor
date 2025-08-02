@@ -1,0 +1,19 @@
+---
+alwaysApply: true
+---
+# Project Structure Guide
+
+This is a Next.js 14+ project with TypeScript. The main structure follows Next.js App Router conventions:
+
+- [src/app/layout.tsx](mdc:src/app/layout.tsx) is the root layout component
+- [src/app/page.tsx](mdc:src/app/page.tsx) is the main page component
+- [src/app/globals.css](mdc:src/app/globals.css) contains global styles
+- [next.config.ts](mdc:next.config.ts) contains Next.js configuration
+- [tsconfig.json](mdc:tsconfig.json) contains TypeScript configuration
+
+## Key Conventions
+- Use the App Router pattern (not pages directory)
+- Keep components in `src/components`
+- Place page-specific components in their respective page directories
+- Store utility functions in `src/utils`
+- Place API routes in `src/app/api`
