@@ -1,0 +1,28 @@
+---
+globs: src/app/api/**/*.ts
+---
+# API Route Guidelines
+
+## Next.js API Routes
+- Use the App Router API pattern with `route.ts` files
+- Always export named functions (GET, POST, PUT, DELETE, etc.)
+- Use `NextRequest` and `NextResponse` types from 'next/server'
+- Return properly typed JSON responses with consistent error handling
+
+## Request/Response Types
+- Define interfaces for request and response bodies
+- Use consistent naming: `interface [Feature][Action]Request` and `interface [Feature][Action]Response`
+- Always include a `success: boolean` field in responses
+- Include optional `error?: string` field for error responses
+
+## Error Handling
+- Use try-catch blocks for all async operations
+- Return meaningful error messages to the client
+- Log errors with `console.error()` for debugging
+- Use appropriate HTTP status codes via NextResponse
+
+## External API Calls
+- Include proper User-Agent headers when scraping content
+- Handle network errors gracefully
+- Validate URLs and inputs before processing
+- Use appropriate timeouts for external requests

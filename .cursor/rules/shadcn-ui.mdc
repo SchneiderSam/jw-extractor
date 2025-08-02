@@ -1,0 +1,63 @@
+---
+globs: *.tsx,*.ts
+description: Guidelines for shadcn/ui components and utilities
+---
+# shadcn/ui Component Guidelines
+
+## Setup and Configuration
+- Components are located in `@/components/ui/`
+- Use the `cn()` utility from `@/lib/utils` for className merging
+- Follow the established design tokens and CSS variables
+- Maintain consistency with the global theme configuration
+
+## Component Usage Patterns
+
+### Form Components
+```typescript
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+// Use with proper form patterns
+<div className="space-y-2">
+  <Label htmlFor="email">Email</Label>
+  <Input id="email" type="email" placeholder="Enter your email" />
+</div>
+```
+
+### Dialog and Modal Patterns
+```typescript
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+
+// Always include proper accessibility attributes
+<Dialog>
+  <DialogTrigger asChild>
+    <Button>Open Dialog</Button>
+  </DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Dialog Title</DialogTitle>
+    </DialogHeader>
+    {/* Content */}
+  </DialogContent>
+</Dialog>
+```
+
+## Styling Guidelines
+- Use the `cn()` utility for conditional classes
+- Prefer Tailwind classes over custom CSS when possible
+- Use CSS variables for theme colors: `hsl(var(--primary))`
+- Follow the established spacing scale (space-y-4, gap-4, etc.)
+
+## Accessibility
+- Always include proper ARIA attributes
+- Use semantic HTML elements
+- Ensure keyboard navigation works correctly
+- Include proper focus management for interactive components
+
+## Common Patterns
+- Use `asChild` prop when wrapping components
+- Implement loading and disabled states consistently
+- Handle form validation with proper error states
+- Use the established color variants (default, destructive, outline, secondary, ghost)

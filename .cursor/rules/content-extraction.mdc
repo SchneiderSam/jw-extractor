@@ -1,0 +1,42 @@
+---
+description: Guidelines for JW.org content extraction and processing
+---
+# JW.org Content Extraction Guidelines
+
+This project specializes in extracting and converting JW.org content to Markdown format.
+
+## URL Validation
+- Always validate that URLs contain `wol.jw.org`
+- Provide clear error messages for invalid URLs
+- Handle different JW.org URL formats and languages
+
+## Content Processing
+- Use JSDOM for HTML parsing and manipulation
+- Target the `article#article` element as the main content container
+- Remove unwanted elements: navigation, footer, advertisements, study prompts
+
+## Study Content Filtering
+- Filter out study prompts in multiple languages:
+  - German: "Deine Antwort"
+  - English: "Your Answer"
+  - French: "Votre réponse"
+  - Spanish: "Su respuesta"
+  - Portuguese: "Sua resposta"
+  - Italian: "La tua risposta"
+  - Japanese: "あなたの答え"
+  - Korean: "당신의 대답"
+
+## Markdown Conversion
+- Use TurndownService for HTML to Markdown conversion
+- Apply custom heading mappings:
+  - h1 → "# Hauptthema: [content]"
+  - h2 → "## Unterthema: [content]"
+- Add semantic prefixes to numbered content:
+  - Questions → "Question: [number]. [content]"
+  - Paragraphs → "Absatz: [number]. [content]"
+
+## Content Cleanup
+- Remove excessive whitespace and normalize line breaks
+- Clean up empty formatting (empty bold/italic tags)
+- Ensure proper spacing around headings and paragraphs
+- Remove elements that are empty or contain only whitespace

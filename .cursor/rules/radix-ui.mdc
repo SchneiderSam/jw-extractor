@@ -1,0 +1,47 @@
+---
+globs: *.tsx,*.ts
+description: Guidelines for using UI component libraries
+---
+# UI Component Library Guidelines
+
+This project uses both Radix UI Themes and shadcn/ui components.
+
+## Component Library Selection
+
+### Use Radix UI Themes for:
+- Page layouts (`Container`, `Box`, `Flex`)
+- Content sections (`Card`)
+- Basic form inputs (`TextField`, `TextArea`, `Button`)
+- Feedback components (`Callout`)
+- Typography (`Heading`, `Text`)
+
+### Use shadcn/ui for:
+- Complex form components (Select, Combobox, DatePicker)
+- Data display (Table, DataTable)
+- Navigation (Tabs, NavigationMenu)
+- Advanced interactions (Dialog, Popover, Tooltip)
+- Custom styled components that need more design control
+
+## Import Patterns
+- Radix UI: Import from `@radix-ui/themes` and `@radix-ui/react-icons`
+- shadcn/ui: Import from `@/components/ui/[component-name]`
+- Use named imports for better tree shaking
+
+## Radix UI Usage
+- Use `Container` for main page layouts with appropriate size props
+- Use `Card` components for content sections with consistent padding
+- Use `Flex` and `Box` for layout composition
+- Apply consistent sizing with size props (1-4 scale)
+- Use CSS variables for colors: `var(--gray-11)` for text colors
+- Use responsive props with breakpoint objects: `{{ initial: 'column', md: 'row' }}`
+
+## shadcn/ui Usage
+- Follow the component patterns from the shadcn/ui documentation
+- Use the `cn()` utility for conditional className merging
+- Maintain consistent styling with the design system
+- Prefer shadcn/ui components for complex interactions
+
+## Consistency Guidelines
+- Don't mix similar components from both libraries in the same feature
+- Use Radix UI for basic layouts and shadcn/ui for enhanced functionality
+- Maintain consistent spacing and sizing across both libraries

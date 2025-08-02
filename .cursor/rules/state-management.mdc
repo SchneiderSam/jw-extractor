@@ -1,0 +1,48 @@
+---
+globs: *.tsx,*.ts
+description: State management patterns for React components
+---
+# State Management Guidelines
+
+## React State Patterns
+- Use `useState` for component-level state
+- Group related state variables when they change together
+- Use descriptive state variable names that indicate their purpose
+
+## Loading States
+- Always implement loading states for async operations
+- Disable interactive elements during loading
+- Provide visual feedback with loading text or spinners
+- Reset loading state in both success and error cases
+
+## Error Handling
+- Use dedicated error state variables
+- Clear errors when starting new operations
+- Provide user-friendly error messages
+- Log detailed errors to console for debugging
+
+## Form State
+- Validate inputs before submission
+- Clear previous errors when starting new operations
+- Handle keyboard events (Enter key) for better UX
+- Use controlled components with value and onChange props
+
+## Async Operations Pattern
+```typescript
+const [isLoading, setIsLoading] = useState(false);
+const [error, setError] = useState<string | null>(null);
+
+const handleAsyncOperation = async () => {
+  setIsLoading(true);
+  setError(null);
+  
+  try {
+    // Async operation
+  } catch (err) {
+    setError('User-friendly error message');
+    console.error('Detailed error:', err);
+  } finally {
+    setIsLoading(false);
+  }
+};
+```
