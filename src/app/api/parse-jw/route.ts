@@ -168,7 +168,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ParseJWRe
     // Custom rule for lists
     turndownService.addRule('preserveLists', {
       filter: ['ul', 'ol'],
-      replacement: function (content, node) {
+      replacement: function (content) {
         return `\n\n${content}\n\n`;
       }
     });

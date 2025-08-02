@@ -106,9 +106,9 @@ export default function WTExtractorPage() {
                       <p><strong>Content will be converted with proper formatting:</strong></p>
                       <ul style={{ marginTop: '8px', paddingLeft: '16px' }}>
                         <li>h1 → # Hauptthema, h2 → ## Unterthema</li>
-                        <li>Questions → "Frage: 6. Was können wir lernen?"</li>
-                        <li>Paragraphs → "Absatz: 1. Der erste Punkt erklärt..."</li>
-                        <li>Study prompts like "Deine Antwort" will be filtered out</li>
+                        <li>Questions → &ldquo;Frage: 6. Was können wir lernen?&rdquo;</li>
+                        <li>Paragraphs → &ldquo;Absatz: 1. Der erste Punkt erklärt...&rdquo;</li>
+                        <li>Study prompts like &ldquo;Deine Antwort&rdquo; will be filtered out</li>
                       </ul>
                     </div>
                   </TooltipContent>
