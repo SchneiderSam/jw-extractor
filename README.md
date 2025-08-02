@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JW Content Extractor
+
+A modern web application built with Next.js 15 that extracts and converts JW.org content into well-formatted Markdown. This tool is specifically designed to help users transform online content from wol.jw.org into clean, structured Markdown format.
+
+## Features
+
+- **Smart Content Extraction**: Automatically extracts content from JW.org articles while removing unnecessary elements like navigation, footers, and study prompts
+- **Intelligent Formatting**:
+  - Converts headings with proper hierarchy (Hauptthema/Unterthema)
+  - Automatically detects and formats questions ("Frage: ...")
+  - Properly formats paragraphs ("Absatz: ...")
+  - Maintains clean spacing and structure
+- **User-Friendly Interface**:
+  - Modern, responsive design using Radix UI components
+  - Real-time error handling and validation
+  - Copy-to-clipboard functionality
+  - Loading states and toast notifications
+  - Helpful tooltips and instructions
+
+## Tech Stack
+
+- **Framework**: Next.js 15 with TypeScript
+- **UI Components**: 
+  - Radix UI Themes
+  - shadcn/ui components
+- **Content Processing**:
+  - JSDOM for HTML parsing
+  - Turndown for HTML to Markdown conversion
+- **Styling**: Tailwind CSS
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Usage
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Navigate to the WT Extractor page
+2. Paste a valid wol.jw.org URL into the input field
+3. Click "Extract Content" or press Enter
+4. The converted Markdown content will appear in the right panel
+5. Use the copy button to copy the formatted content to your clipboard
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/src/app/wt-extractor`: Main extractor page component
+- `/src/app/api/parse-jw`: API route for content parsing
+- `/src/components/ui`: Reusable UI components
+- `/src/lib`: Utility functions and helpers
 
-## Learn More
+## Contributing
 
-To learn more about Next.js, take a look at the following resources:
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is open source and available under the MIT license.
