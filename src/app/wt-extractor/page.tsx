@@ -12,7 +12,9 @@ import {
   Card,
   Callout
 } from '@radix-ui/themes';
-import { MagnifyingGlassIcon, CopyIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { SymbolIcon, CopyIcon, ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { toast } from 'sonner';
 
 interface ParseJWResponse {
   success: boolean;
@@ -55,6 +57,7 @@ export default function WTExtractorPage() {
 
       if (data.success && data.markdown) {
         setOutputText(data.markdown);
+        toast.success('Content extracted successfully!');
       } else {
         setError(data.error || 'Failed to parse the URL');
       }
@@ -70,9 +73,10 @@ export default function WTExtractorPage() {
     if (outputText) {
       try {
         await navigator.clipboard.writeText(outputText);
-        // You could add a toast notification here
+        toast.success('Markdown copied to clipboard!');
       } catch (err) {
         console.error('Failed to copy text: ', err);
+        toast.error('Failed to copy to clipboard');
       }
     }
   };
@@ -91,7 +95,25 @@ export default function WTExtractorPage() {
         <Box style={{ flex: '1' }}>
           <Card style={{ height: '100%', padding: '1rem' }}>
             <Box mb="3">
-              <Heading size="4" mb="3">JW.org URL</Heading>
+              <Flex align="center" gap="2" mb="3">
+                <Heading size="4">JW.org URL</Heading>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <InfoCircledIcon style={{ color: 'var(--gray-9)', cursor: 'help' }} />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div style={{ maxWidth: '300px' }}>
+                      <p><strong>Content will be converted with proper formatting:</strong></p>
+                      <ul style={{ marginTop: '8px', paddingLeft: '16px' }}>
+                        <li>h1 → # Hauptthema, h2 → ## Unterthema</li>
+                        <li>Questions → "Question: 6. Was können wir lernen?"</li>
+                        <li>Paragraphs → "Absatz: 1. Der erste Punkt erklärt..."</li>
+                        <li>Study prompts like "Deine Antwort" will be filtered out</li>
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </Flex>
               <p style={{ color: 'var(--gray-11)', fontSize: '14px', marginBottom: '1rem' }}>
                 Enter a JW.org URL (e.g., https://wol.jw.org/de/wol/d/r10/lp-x/2025403)
               </p>
@@ -110,7 +132,7 @@ export default function WTExtractorPage() {
                 }}
               >
                 <TextField.Slot>
-                  <MagnifyingGlassIcon height="16" width="16" />
+                  <SymbolIcon height="16" width="16" />
                 </TextField.Slot>
               </TextField.Root>
               
@@ -140,13 +162,6 @@ export default function WTExtractorPage() {
           <Card style={{ height: '100%', padding: '1rem' }}>
             <Box mb="3">
               <Heading size="4" mb="3">Markdown Output</Heading>
-              <p style={{ color: 'var(--gray-11)', fontSize: '14px', marginBottom: '1rem' }}>
-                Content will be converted with proper formatting:<br/>
-                • h1 → # Hauptthema, h2 → ## Unterthema<br/>
-                • Questions → "Question: 6. Was können wir lernen?"<br/>
-                • Paragraphs → "Absatz: 1. Der erste Punkt erklärt..."<br/>
-                • Study prompts like "Deine Antwort" will be filtered out
-              </p>
             </Box>
             <Flex direction="column" gap="3" style={{ height: 'calc(100% - 100px)' }}>
               <TextArea
@@ -162,15 +177,22 @@ export default function WTExtractorPage() {
                 }}
                 readOnly={isLoading}
               />
-              <Button
-                size="3"
-                variant="soft"
-                onClick={handleCopy}
-                disabled={!outputText || isLoading}
-              >
-                <CopyIcon width="16" height="16" />
-                Copy Markdown
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="3"
+                    variant="soft"
+                    onClick={handleCopy}
+                    disabled={!outputText || isLoading}
+                  >
+                    <CopyIcon width="16" height="16" />
+                    Copy Markdown
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Copy the formatted markdown content to clipboard</p>
+                </TooltipContent>
+              </Tooltip>
             </Flex>
           </Card>
         </Box>
