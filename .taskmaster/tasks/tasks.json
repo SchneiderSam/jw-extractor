@@ -294,11 +294,24 @@
         ],
         "priority": "high",
         "subtasks": []
+      },
+      {
+        "id": 22,
+        "title": "Remove Invalid 'skipWaiting' Option from next-pwa Configuration to Fix Vercel Build Error",
+        "description": "Eliminate the unsupported 'skipWaiting' option from the next-pwa configuration in next.config.ts to resolve Vercel build errors caused by incompatibility with the @ducanh2912/next-pwa plugin.",
+        "details": "1. Open the project's next.config.ts (or next.config.js) file.\n2. Locate the next-pwa (or @ducanh2912/next-pwa) configuration block. This is typically where options like 'dest', 'register', and 'skipWaiting' are set.\n3. Remove the 'skipWaiting' property entirely from the configuration object. For example, change:\n\n```js\nconst withPWA = require('@ducanh2912/next-pwa')({\n  dest: 'public',\n  register: true,\n  skipWaiting: true, // REMOVE THIS LINE\n  // ...other options\n});\n```\n\n4. Ensure no other references to 'skipWaiting' exist in the configuration or related files.\n5. Save the file and commit the changes.\n6. If using a monorepo or custom build pipeline (e.g., Turborepo), ensure the configuration is updated in all relevant packages or apps.\n7. Review the @ducanh2912/next-pwa documentation to confirm supported options and avoid similar issues in the future.",
+        "testStrategy": "1. Run a local build (`next build`) and verify that no errors related to 'skipWaiting' or next-pwa configuration occur.\n2. Deploy the project to Vercel and confirm that the build completes successfully without configuration errors.\n3. Test PWA functionality in production to ensure service worker registration and offline support still work as expected.\n4. Review Vercel build logs to confirm the absence of previous errors and validate that the next-pwa plugin is functioning correctly.",
+        "status": "done",
+        "dependencies": [
+          11
+        ],
+        "priority": "high",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-10-06T12:17:42.313Z",
-      "updated": "2025-10-06T13:06:30.895Z",
+      "updated": "2025-10-06T13:14:37.511Z",
       "description": "Tasks for master context"
     }
   }

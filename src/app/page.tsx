@@ -14,7 +14,7 @@ export default function Home() {
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
   const [markdown, setMarkdown] = useState('');
-  const [extractedHtml, setExtractedHtml] = useState('');
+  const [, setExtractedHtml] = useState(''); // Stored but not displayed
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -88,7 +88,7 @@ export default function Home() {
       setTimeout(() => {
         setIsCopied(false);
       }, 2000);
-    } catch (err) {
+    } catch {
       toast.error('Failed to copy', {
         description: 'Please try again or copy manually.',
       });
@@ -114,7 +114,7 @@ export default function Home() {
       } else if (result.error) {
         setError(result.error.message);
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
