@@ -307,11 +307,25 @@
         ],
         "priority": "high",
         "subtasks": []
+      },
+      {
+        "id": 23,
+        "title": "Handle SVG Removal in Markdown Conversion with TypeScript",
+        "description": "Fix TypeScript errors in markdown-converter.ts where 'svg' is not recognized as a valid HTML element tag name for turndownService.remove(), and ensure SVG content is correctly excluded from the Markdown output.",
+        "details": "Turndown.js's TypeScript type definitions do not natively recognize 'svg' as a valid HTML element tag name, causing type errors when attempting to remove SVG elements via turndownService.remove(['svg'])[1]. To resolve this, implement a solution that either extends the Turndown.js type definitions to include SVG, or handles SVG removal in a type-safe way. Consider the following steps:\n\n- **Type Extension Approach**: Augment the Turndown.js module declarations to include 'svg' in the TagName type, allowing turndownService.remove(['svg']) to pass TypeScript checks. This can be done via a custom type declaration file (e.g., turndown.d.ts) that extends the existing types[1].\n- **Runtime Filtering**: Alternatively, pre-process the HTML using Cheerio to remove all <svg> elements before passing the content to Turndown.js. This avoids the type issue entirely and is semantically clear.\n- **Documentation**: Update project documentation to clarify how SVG handling is implemented, especially if a custom type augmentation is used.\n\nExample type augmentation (turndown.d.ts):\n```typescript\ndeclare module 'turndown' {\n  interface TurndownService {\n    remove(filter: (string | string[]) & { svg?: never }): this;\n  }\n}\n```\nOr, in Cheerio preprocessing:\n```typescript\n$('svg').remove();\nconst markdown = turndownService.turndown($.html());\n```\nChoose the approach that best fits the project's architecture and maintainability goals.",
+        "testStrategy": "1. Prepare test HTML samples containing various SVG elements, both inline and as part of complex structures.\n2. Run the markdown conversion pipeline and verify that no SVG content appears in the output.\n3. Confirm that TypeScript no longer reports errors related to 'svg' in turndownService.remove().\n4. If using type augmentation, verify that the custom type declaration does not conflict with other Turndown.js usage.\n5. Test edge cases, such as SVG inside other elements or SVG with specific attributes, to ensure complete removal.\n6. Document the chosen solution and update any relevant project documentation or comments.",
+        "status": "done",
+        "dependencies": [
+          1,
+          3
+        ],
+        "priority": "high",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-10-06T12:17:42.313Z",
-      "updated": "2025-10-06T13:14:37.511Z",
+      "updated": "2025-10-06T13:17:15.229Z",
       "description": "Tasks for master context"
     }
   }

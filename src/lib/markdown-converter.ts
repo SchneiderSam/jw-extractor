@@ -18,7 +18,7 @@ export function convertHtmlToMarkdown(html: string): string {
   turndownService.remove(['img', 'picture', 'figure']);
 
   // Remove scripts, styles, and other unwanted elements
-  turndownService.remove(['script', 'style', 'noscript', 'iframe', 'svg']);
+  turndownService.remove(['script', 'style', 'noscript', 'iframe']);
 
   // Remove navigation, sidebars, and other non-content elements
   turndownService.addRule('removeNav', {
