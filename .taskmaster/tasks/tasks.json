@@ -1,0 +1,305 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Initialize Next.js Project with TypeScript and Tailwind",
+        "description": "Set up a new Next.js 15+ project using the App Router, TypeScript, and Tailwind CSS via Shadcn UI.",
+        "details": "Run `npx create-next-app@latest` with TypeScript and Tailwind CSS. Install Shadcn UI components (Input, Textarea, Button, Toast, Skeleton) and Lucide React icons. Configure Tailwind for responsive design. Ensure project structure is clean and ready for further development.",
+        "testStrategy": "Verify project starts without errors. Confirm TypeScript and Tailwind are correctly integrated. Test basic Shadcn UI components render in a sample page.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement URL Input with Validation",
+        "description": "Create a single-page UI with a Shadcn UI Input field for jw.org/wol.jw.org URLs, including real-time validation and a clear button.",
+        "details": "Add a Shadcn UI Input component. Implement client-side regex validation for jw.org/wol.jw.org URLs. Display error messages for invalid formats. Add a clear button to reset the input. Ensure responsive design works on mobile and desktop.",
+        "testStrategy": "Test with valid and invalid URLs. Verify error messages appear correctly. Test clear button functionality. Check responsiveness across devices.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Develop Server Action for Content Extraction",
+        "description": "Create a Next.js Server Action to fetch HTML from the provided URL, parse it with Cheerio, and extract the #content div.",
+        "details": "Define a Server Action `extractContent(url: string): Promise<ExtractionResult>`. Use fetch/axios to get HTML. Parse with Cheerio, targeting `#content.content`. Return extracted HTML or error if not found. Handle network errors gracefully.",
+        "testStrategy": "Test with various jw.org/wol.jw.org URLs. Verify correct extraction of #content div. Test error cases (invalid URL, network error, content not found).",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Integrate HTML-to-Markdown Conversion",
+        "description": "Convert extracted HTML to Markdown using Turndown.js with basic rules for headings, lists, quotes, and paragraphs.",
+        "details": "Install Turndown.js. Create a conversion function that preserves headings, lists, blockquotes, and paragraphs. Ignore headers, footers, sidebars, and images. Return clean Markdown string.",
+        "testStrategy": "Test conversion with sample HTML from jw.org. Verify Markdown output matches expected structure. Check that unwanted elements (headers, footers) are omitted.",
+        "priority": "high",
+        "dependencies": [
+          3
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Display Markdown in Editable Textarea",
+        "description": "Show the converted Markdown in a large, editable Shadcn UI Textarea component.",
+        "details": "Add a Shadcn UI Textarea to the page. Populate it with the Markdown output from the Server Action. Ensure the textarea is editable and maintains formatting. Make it responsive.",
+        "testStrategy": "Verify Markdown displays correctly after extraction. Test editing functionality. Check responsiveness on different devices.",
+        "priority": "high",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Copy to Clipboard with Toast Feedback",
+        "description": "Add a button to copy Markdown to clipboard using the Clipboard API, with a Shadcn Toast notification on success.",
+        "details": "Add a Shadcn UI Button next to the textarea. Use `navigator.clipboard.writeText()` to copy Markdown. Show a Shadcn Toast/Sonner notification confirming the copy. Use a Lucide icon for visual clarity.",
+        "testStrategy": "Test copy functionality in supported browsers. Verify toast appears on success. Check fallback behavior if Clipboard API is unavailable.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Add Loading States and Skeleton Loader",
+        "description": "Implement visual feedback during content extraction, including a pulsing skeleton loader.",
+        "details": "Add a loading state to the UI when the Server Action is running. Use Shadcn UI Skeleton component as a pulsing loader. Show the skeleton over the textarea area during processing.",
+        "testStrategy": "Verify loader appears during extraction and disappears when done. Test with slow network conditions. Ensure UI remains responsive.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          5
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Enhance Error Handling with Specific Messages",
+        "description": "Display clear, specific error messages for invalid URLs, content not found, and network errors.",
+        "details": "Extend error handling in the Server Action to distinguish between invalid URL, content not found, and network error. Surface these errors in the UI with descriptive messages. Style errors for visibility.",
+        "testStrategy": "Test each error scenario. Verify correct error message is shown. Check that errors are cleared on retry or input change.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Dark Mode with System Preference Detection",
+        "description": "Add dark mode support using next-themes, including system preference detection and a manual toggle.",
+        "details": "Install next-themes. Add a Shadcn UI Switch for manual theme toggling. Detect system preference. Update all Shadcn components to support dark mode. Persist preference in localStorage. Ensure smooth transitions.",
+        "testStrategy": "Test theme switching manually and via system preference. Verify all components adapt to dark/light mode. Check persistence after page reload.",
+        "priority": "low",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Refine Markdown Conversion for JW.org Specific Elements",
+        "description": "Extend Turndown.js rules to handle question boxes, scripture citations, and other JW.org-specific formatting.",
+        "details": "Analyze JW.org HTML structure for question boxes (`div.questionBox`), scripture citations, and special formatting. Add custom Turndown.js rules to preserve these elements in Markdown. Test with diverse article types.",
+        "testStrategy": "Test conversion with articles containing question boxes and scripture citations. Verify special formatting is preserved in Markdown output.",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Implement PWA Features (Manifest, Service Worker, Offline Support)",
+        "description": "Make the app installable as a PWA with a manifest, service worker, and offline support for already-extracted content.",
+        "details": "Create a `manifest.json` with app metadata and icons. Configure next-pwa or a custom service worker. Implement caching strategy (network-first for extractions, cache-first for assets). Add offline fallback page. Test installation prompt on supported browsers.",
+        "testStrategy": "Verify PWA installation on mobile and desktop. Test offline access to previously extracted content. Check that new extractions require network.",
+        "priority": "low",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Conduct Accessibility Audit and Final Polish",
+        "description": "Perform an accessibility audit, add keyboard shortcuts, and optimize performance.",
+        "details": "Audit for WCAG 2.1 AA compliance (keyboard nav, screen reader, color contrast). Add keyboard shortcuts (Ctrl/Cmd+Enter to extract, Ctrl/Cmd+C to copy). Optimize performance (code splitting, lazy loading). Add meta tags for SEO. Conduct cross-browser testing.",
+        "testStrategy": "Use automated and manual accessibility testing tools. Verify keyboard shortcuts work. Measure performance metrics (Lighthouse). Test in target browsers.",
+        "priority": "low",
+        "dependencies": [
+          1,
+          2,
+          5,
+          6
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Integrate Tweakcn Theme Editor for Shadcn UI Customization",
+        "description": "Add Tweakcn-generated styling code to the project and integrate its theme customization functionality into the existing Shadcn UI setup for enhanced branding and UI distinctiveness.",
+        "details": "Begin by visiting the Tweakcn web-based theme editor and use its visual controls (sliders, color pickers, typography settings) to design a custom theme for your Shadcn UI components. Export the generated CSS variables or JSON preset from Tweakcn. Integrate these variables into your project's Tailwind configuration (e.g., `tailwind.config.js` for v3/v4 or the new theme file) and/or global stylesheet (`globals.css`). Ensure that all Shadcn UI components reference the new theme variables for colors, radii, and typography. Test the integration by previewing components and confirming that the custom styles are applied consistently. Document the integration steps and update README with instructions for future theme changes. Consider version-controlling the exported theme preset for team collaboration and future updates.",
+        "testStrategy": "Verify that all Shadcn UI components reflect the customized theme in both light and dark modes. Check that color, typography, and spacing changes from Tweakcn are applied consistently across the app. Test real-time updates by modifying theme variables and observing immediate UI changes. Confirm accessibility contrast checks using Tweakcn's preview and manual inspection. Ensure no regressions in component functionality or layout. Review documentation for clarity and completeness.",
+        "status": "done",
+        "dependencies": [
+          1,
+          9
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Filter Out 'Your Answer' Textarea Fields During Markdown Conversion",
+        "description": "Remove all '.gen-field' divs containing 'Your Answer' textarea fields from JW.org article HTML during extraction or markdown conversion so they do not appear in the final output.",
+        "details": "Update the HTML extraction and/or Turndown.js markdown conversion logic to specifically identify and exclude all '.gen-field' divs that contain textarea fields intended for reader notes (commonly labeled 'Your Answer').\n\nImplementation steps:\n- In the HTML extraction phase (Cheerio), locate and remove all elements matching the selector '.gen-field textarea' or their parent '.gen-field' divs before passing the HTML to markdown conversion.\n- Alternatively, add a custom Turndown.js rule that ignores '.gen-field' divs and their contents during markdown conversion.\n- Ensure that only the note-taking fields are removed, without affecting other interactive or content elements.\n- Test with multiple JW.org articles to confirm that all 'Your Answer' fields are filtered out, regardless of their position or nesting in the HTML.\n- Document the filtering logic and update relevant code comments for maintainability.",
+        "testStrategy": "Extract HTML from several JW.org articles known to contain 'Your Answer' textarea fields. Run the extraction and markdown conversion pipeline and verify that no remnants of '.gen-field' divs or textarea fields appear in the final markdown output. Check edge cases where these fields may be nested or styled differently. Confirm that other content is unaffected and markdown structure remains correct.",
+        "status": "done",
+        "dependencies": [
+          3,
+          4,
+          10
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Extract and Prepend Article Title (H1) to Markdown Output",
+        "description": "Extract the article's H1 title from the header and ensure it appears at the very top of the generated Markdown, while ignoring other header elements such as 'STUDIENARTIKEL' and 'LIED' references.",
+        "details": "Update the extraction and conversion pipeline to:\n\n- Use Cheerio to locate and extract the first <h1> element within the article's header or main content area before Markdown conversion.\n- Remove or ignore any other header elements (such as those containing 'STUDIENARTIKEL', 'LIED', or similar non-title references) to avoid their inclusion in the Markdown output.\n- Prepend the extracted H1 text as a Markdown heading (e.g., '# Article Title') at the very top of the final Markdown string, before any other content.\n- Ensure that the H1 is not duplicated if it would otherwise appear in the converted Markdown body.\n- Refactor the Turndown.js conversion logic if necessary to prevent unwanted header elements from being included, and to guarantee the correct placement of the article title.\n- Consider edge cases where the H1 may be missing, malformed, or located in an unexpected part of the DOM, and handle these gracefully (e.g., by omitting the title or logging a warning).\n\nExample implementation steps:\n1. In the extraction function, use Cheerio to select the first <h1> within the relevant header or content area.\n2. Remove this <h1> from the HTML before passing it to Turndown.js to avoid duplication.\n3. Convert the remaining HTML to Markdown as usual.\n4. Concatenate the Markdown-formatted title (e.g., '# Title') and the converted Markdown body, ensuring the title is at the very top.",
+        "testStrategy": "Test with a variety of JW.org articles, including those with and without H1 titles, and those with extra header elements like 'STUDIENARTIKEL' or 'LIED'.\n- Verify that the Markdown output always begins with the correct article title as a Markdown H1, and that no unwanted header elements appear.\n- Confirm that the title is not duplicated elsewhere in the Markdown.\n- Check edge cases where the H1 is missing or malformed, ensuring the output remains valid and no errors are thrown.\n- Compare output with expected Markdown for representative articles.",
+        "status": "done",
+        "dependencies": [
+          3,
+          4,
+          10,
+          14
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Improve Markdown Formatting Quality",
+        "description": "Enhance the Markdown output by adding line breaks, reducing excessive bold formatting, converting headings to normal case, and removing image references.",
+        "details": "1. **Add Line Breaks**: Insert a line break after each paragraph and question to improve readability. 2. **Reduce Bold Formatting**: Minimize the use of double asterisks for bold text in questions, ensuring clarity without excessive emphasis. 3. **Convert Headings**: Change H2 headings from ALL CAPS to normal case for better readability. 4. **Remove Image References**: Completely eliminate image syntax (`![alt]`) from the output. 5. **Integration with Existing Tasks**: Ensure these changes are integrated into the Markdown conversion pipeline, particularly after tasks like HTML-to-Markdown conversion and JW.org-specific element handling.",
+        "testStrategy": "1. Test the updated Markdown output for correct line breaks and reduced bold formatting. 2. Verify that headings are in normal case. 3. Confirm that no image references remain. 4. Use sample articles to ensure these changes do not disrupt existing formatting or functionality.",
+        "status": "done",
+        "dependencies": [
+          4,
+          10,
+          14
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Fix Markdown Formatting Issues with Turndown Rules",
+        "description": "Adjust Turndown rules to correct paragraph and question formatting issues in Markdown output, ensuring proper separation and recognition of elements like paragraph numbers and italic quotes.",
+        "details": "1. **Analyze HTML Structure**: Carefully examine the HTML structure of the input content to identify elements that need special handling, such as paragraph numbers and questions. 2. **Customize Turndown Rules**: Use Turndown's `addRule` method to create custom rules for handling paragraph numbers, questions, and italic quotes. For example, add a rule to ensure paragraph numbers are on their own line or properly separated from the text. 3. **Implement Separation Logic**: Ensure questions are clearly separated from paragraph numbers by adding appropriate line breaks or formatting. 4. **Fix Bold/Italic Markers**: Adjust the rules to prevent mixing of bold and italic markers, ensuring clean and consistent formatting. 5. **Ensure Paragraph Line Breaks**: Modify the rules to start each paragraph on a new line after the paragraph number. 6. **Test with Diverse Content**: Test the updated rules with a variety of input HTML to ensure the fixes work across different scenarios.",
+        "testStrategy": "1. Test the updated Markdown output with sample HTML containing paragraph numbers, questions, and italic quotes. 2. Verify that paragraph numbers are correctly separated and questions are clearly distinguished. 3. Check that bold and italic markers are used consistently without mixing. 4. Confirm each paragraph starts on a new line after its number. 5. Use different types of input HTML to ensure the rules handle various formatting scenarios correctly.",
+        "status": "done",
+        "dependencies": [
+          4,
+          10,
+          16
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Update Question and Paragraph Number Extraction Logic",
+        "description": "Revise the HTML extraction logic to correctly identify questions in <p class='qu'> elements and accurately extract paragraph numbers from <span class='parNum'> using the data-pnum attribute, ensuring proper Markdown formatting.",
+        "details": "Update the Cheerio-based extraction pipeline to target <p class='qu'> elements for questions, rather than <div> elements. For paragraph numbers, extract the value of the data-pnum attribute from <span class='parNum'> elements instead of relying on text content. Format extracted paragraph numbers as **[1]** in the Markdown output. Use Cheerio's .attr() method to read attribute values[3]. For questions, iterate through all matching <p class='qu'> elements and extract their text content. For paragraph numbers, locate all <span class='parNum'> elements, extract their data-pnum values, and prepend the formatted number to the corresponding paragraph in Markdown. Ensure this logic integrates seamlessly with the existing Turndown.js conversion rules for consistent output. Example Cheerio snippet for attribute extraction:\n\nconst $ = cheerio.load(html);\nconst parNum = $('.parNum').attr('data-pnum'); // Extracts '1' from <span class='parNum' data-pnum='1'></span>[3]\n\nFor multiple elements, use .each() to collect all values[3]. Update Turndown.js custom rules to handle the new HTML structure and attribute-based numbering.",
+        "testStrategy": "1. Test with sample HTML containing multiple <p class='qu'> questions and <span class='parNum' data-pnum='...'> elements. Verify that all questions are correctly identified and extracted, and that paragraph numbers are displayed as **[1]**, **[2]**, etc., based on the data-pnum attribute. 2. Check edge cases: articles with no questions, articles with no paragraph numbers, and articles with mixed content. 3. Confirm that the Markdown output maintains proper separation and formatting for both questions and paragraph numbers. 4. Validate that the extraction logic does not interfere with other Turndown.js rules or existing formatting enhancements.",
+        "status": "done",
+        "dependencies": [
+          3,
+          4,
+          10
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Fix Missing Line Breaks After Questions in Markdown Output",
+        "description": "Ensure that each extracted question is followed by a proper line break so that questions do not run directly into paragraph numbers or subsequent content in the Markdown output.",
+        "details": "Update the Markdown conversion logic to guarantee that every question (extracted from <p class='qu'> elements) is followed by at least one line break (\\n or \\n\\n) before any subsequent paragraph number or content appears. This may require adjusting the Turndown.js custom rules or post-processing the Markdown output to insert a line break after each question block. Carefully review the output to ensure that questions are visually separated from paragraph numbers (e.g., **[1]**) and that no questions run into the next paragraph or content. Consider edge cases where multiple questions or questions followed by paragraphs occur. If necessary, add or modify Turndown rules to enforce this separation at the element level, ensuring consistent formatting regardless of input HTML variations.",
+        "testStrategy": "1. Prepare sample HTML containing multiple <p class='qu'> questions, each followed by paragraph numbers and content. 2. Run the extraction and Markdown conversion pipeline. 3. Verify that in the Markdown output, each question is followed by a line break, and that paragraph numbers or content always start on a new line after a question. 4. Check edge cases with consecutive questions, questions at the end of sections, and questions with or without following paragraphs. 5. Confirm that no questions run directly into paragraph numbers or other content in the output.",
+        "status": "done",
+        "dependencies": [
+          16,
+          17,
+          18
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 20,
+        "title": "Fix Line Breaks After Questions in Markdown Output",
+        "description": "Ensure proper line breaks are inserted after questions in the Markdown output to prevent them from running into paragraph numbers or subsequent content.",
+        "details": "Update the Markdown conversion logic to guarantee that every question (extracted from `<p class='qu'>` elements) is followed by at least one line break (`\n` or `\n\n`) before any subsequent paragraph number or content appears. This may require adjusting the Turndown.js custom rules or post-processing the Markdown output to insert a line break after each question block. Carefully review the output to ensure that questions are visually separated from paragraph numbers (e.g., **[1]**) and that no question directly precedes a paragraph number without proper spacing.",
+        "testStrategy": "1. Prepare sample HTML containing multiple `<p class='qu'>` questions, each followed by paragraph numbers and content. 2. Run the extraction and Markdown conversion pipeline. 3. Verify that in the Markdown output, each question is followed by a line break, and that paragraph numbers or content always appear on a new line after questions.",
+        "status": "done",
+        "dependencies": [
+          18,
+          19
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 21,
+        "title": "Change Paragraph Number Formatting to Inline Without Brackets",
+        "description": "Update the Markdown conversion logic so that paragraph numbers appear inline, directly before the paragraph text, as plain numbers without brackets or line breaks.",
+        "details": "Modify the extraction and Markdown conversion pipeline (including any Cheerio and Turndown.js custom rules) to change how paragraph numbers are formatted. Instead of outputting paragraph numbers on their own line with brackets (e.g., '**[2]**'), output them as plain numbers (e.g., '2') directly before the paragraph text, separated by a single space. Remove any logic that inserts line breaks or brackets around paragraph numbers. Ensure that this change does not interfere with the formatting of questions, headings, or other special elements. Carefully review the handling of <span class='parNum'> elements and update any post-processing steps to match the new format. Provide code comments and examples for maintainability. Example transformation: from '**[2]**\\nParagraph text.' to '2 Paragraph text.'",
+        "testStrategy": "1. Prepare sample HTML with multiple paragraphs containing <span class='parNum'> elements. 2. Run the extraction and Markdown conversion pipeline. 3. Verify that in the Markdown output, each paragraph number appears inline, directly before the paragraph text, as a plain number with a single space and no brackets or line breaks. 4. Confirm that no paragraph numbers appear on their own line or with brackets. 5. Check that questions, headings, and other formatting remain unaffected. 6. Test with edge cases such as missing or duplicate paragraph numbers.",
+        "status": "done",
+        "dependencies": [
+          16,
+          18,
+          20
+        ],
+        "priority": "high",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-10-06T12:17:42.313Z",
+      "updated": "2025-10-06T13:06:30.895Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

@@ -39,3 +39,33 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Logs
+logs
+*.log
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+.env
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/
+
+# PWA files
+/public/sw.js
+/public/workbox-*.js
+/public/worker-*.js
+/public/sw.js.map
+/public/workbox-*.js.map
+/public/worker-*.js.map 

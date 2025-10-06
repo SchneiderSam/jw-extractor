@@ -1,0 +1,402 @@
+<context>
+# Overview  
+JW Content Extractor is a focused web application that extracts article content from jw.org and wol.jw.org websites and converts it to clean Markdown format. The tool solves the problem of copying structured content from JW.org articles for personal use, study notes, or documentation purposes. Users can simply paste a URL, receive formatted Markdown output, and copy it to their clipboard. The application prioritizes simplicity, speed, and a clean user experience with no data persistence required.
+
+# Core Features  
+
+## URL Input with Validation
+- Clean input field powered by Shadcn UI for entering jw.org/wol.jw.org URLs
+- Clear button to reset the input field
+- Real-time validation with error messages for invalid URLs
+- Responsive design that works across devices
+
+## Content Extraction & Conversion
+- Fetches HTML content from provided URL via Next.js Server Action
+- Extracts content specifically from `<div id="content" class="content">` element
+- Converts HTML to Markdown preserving:
+  - Headings (all levels)
+  - Lists (ordered and unordered)
+  - Quotes/blockquotes
+  - Question boxes (when present, as structure varies per article)
+  - Paragraph formatting
+- Ignores headers, sidebars, footers, and navigation elements
+- No image extraction (text-only focus)
+
+## Loading States & Feedback
+- Pulsing skeleton loader during content extraction
+- Visual indication of processing state
+- Error messages for three scenarios:
+  1. Invalid URL format
+  2. Content div not found on page
+  3. Page not reachable/network error
+
+## Markdown Display & Editing
+- Large, editable textarea displaying extracted Markdown
+- Syntax-highlighted or plain text view
+- Users can manually edit Markdown before copying
+- Maintains formatting and readability
+
+## Copy to Clipboard
+- One-click copy button for extracted Markdown
+- Toast notification confirming successful copy
+- Lucide icon for visual clarity
+
+## Progressive Web App (PWA)
+- Installable on desktop and mobile devices
+- Works offline for already-extracted content
+- Fast loading times with service worker caching
+- App-like experience with custom icons
+
+## Dark Mode Support
+- System preference detection
+- Manual toggle option
+- Smooth theme transitions
+- All components (input, textarea, buttons) styled for both modes
+
+# User Experience  
+
+## User Persona
+**Name:** Maria, Bible Study Enthusiast
+**Age:** 28-55
+**Tech Savvy:** Medium (comfortable with web apps)
+**Goal:** Extract JW.org articles into Markdown for personal study notes, Obsidian vault, or sharing with study groups
+**Pain Points:** Current process requires manual copying, loses formatting, includes unwanted header/footer content
+
+## Key User Flow
+1. User opens the app (web or PWA)
+2. Pastes or types jw.org/wol.jw.org URL into input field
+3. (Optional) Uses clear button if needed to reset
+4. Clicks extract/submit button
+5. Sees pulsing skeleton loader while content is being processed
+6. Receives formatted Markdown in editable textarea below
+7. (Optional) Edits the Markdown if needed
+8. Clicks copy button to copy to clipboard
+9. Receives toast confirmation "Copied to clipboard!"
+10. Pastes content into their target application (Obsidian, Notion, etc.)
+
+## Error Flow
+- **Invalid URL:** Red error message appears below input: "Invalid URL format. Please enter a valid jw.org or wol.jw.org link."
+- **Content Not Found:** Error message: "Content could not be loaded. The page structure may have changed."
+- **Network Error:** Error message: "The page is not reachable. Please check your internet connection."
+
+## UI/UX Considerations
+- Clean, minimal interface focused on the task
+- Single page application (no navigation needed)
+- Mobile-first responsive design
+- Accessibility: keyboard navigation, screen reader support
+- Fast perceived performance with optimistic UI updates
+- Clear visual hierarchy: Input → Loading → Output → Action
+</context>
+
+<PRD>
+# Technical Architecture  
+
+## System Components
+
+### Frontend (Next.js 15+ App Router)
+- **Framework:** Next.js with App Router, TypeScript, React 18+
+- **Styling:** Tailwind CSS via Shadcn UI
+- **UI Components:** Shadcn UI (Input, Textarea, Button, Toast, Skeleton)
+- **Icons:** Lucide React
+- **State Management:** React useState/useEffect (no global state needed)
+- **Theme:** next-themes for dark mode implementation
+
+### Backend (Next.js Server Actions)
+- **Content Fetching:** Native fetch API or axios for HTTP requests
+- **HTML Parsing:** Cheerio (lightweight, server-side DOM parsing)
+- **HTML to Markdown:** Turndown.js with custom rules for:
+  - Question boxes (div.questionBox or similar)
+  - Scripture citations
+  - Special JW.org formatting elements
+- **Error Handling:** Try-catch blocks with specific error types
+
+### PWA Implementation
+- **Manifest:** next-pwa plugin or manual PWA configuration
+- **Service Worker:** Workbox or custom service worker
+- **Icons:** Multiple sizes (192x192, 512x512) for various devices
+- **Offline Strategy:** Network-first for URLs, cache-first for assets
+
+## Data Models
+
+No persistent data storage required. All data is ephemeral:
+
+```typescript
+// Input
+interface ExtractionRequest {
+  url: string;
+}
+
+// Output
+interface ExtractionResult {
+  success: boolean;
+  markdown?: string;
+  error?: {
+    type: 'INVALID_URL' | 'CONTENT_NOT_FOUND' | 'NETWORK_ERROR';
+    message: string;
+  };
+}
+
+// Internal processing
+interface ParsedContent {
+  html: string;
+  contentDiv: CheerioElement;
+}
+```
+
+## APIs and Integrations
+
+### Server Action: `extractContent`
+```typescript
+'use server'
+async function extractContent(url: string): Promise<ExtractionResult>
+```
+
+**Steps:**
+1. Validate URL format (regex for jw.org/wol.jw.org)
+2. Fetch HTML content from URL
+3. Parse HTML with Cheerio
+4. Extract `#content` div
+5. Convert extracted HTML to Markdown using Turndown
+6. Apply custom rules for JW.org specific elements
+7. Return markdown string or error
+
+### Client-Side API
+- Native Clipboard API for copy functionality
+- `navigator.clipboard.writeText(markdown)`
+
+## Infrastructure Requirements
+- **Hosting:** Vercel (optimized for Next.js) or any Node.js hosting
+- **Domain:** Optional custom domain
+- **SSL:** Required (automatic with Vercel)
+- **Environment:** Node.js 18+
+- **Build Time:** Static generation where possible, server-side rendering for dynamic content
+
+# Development Roadmap  
+
+## Phase 1: MVP - Core Functionality
+**Goal:** Get a working extractor with basic UI
+
+### Must-Have Features:
+1. Basic Next.js app setup with TypeScript and Tailwind
+2. Single page with Shadcn UI Input field for URL
+3. Server Action that fetches URL and extracts `#content` div
+4. HTML to Markdown conversion with Turndown (basic rules)
+5. Display Markdown in Shadcn Textarea
+6. Copy to Clipboard button with basic feedback
+7. Simple loading state (spinner or basic skeleton)
+8. Basic error handling (single generic error message)
+
+**Success Criteria:** User can paste a wol.jw.org URL, click a button, wait for loading, see Markdown output, and copy it.
+
+## Phase 2: Enhanced UX & Error Handling
+**Goal:** Polish the user experience and handle edge cases
+
+### Features:
+1. Pulsing skeleton loader (replace basic spinner)
+2. Clear button in URL input field
+3. Specific error messages for three error types
+4. Editable textarea for Markdown (enable editing)
+5. Toast notifications (Shadcn Toast/Sonner)
+6. Improved Markdown conversion rules:
+   - Question boxes detection and formatting
+   - Better handling of lists and quotes
+   - Scripture citation preservation
+7. URL validation before submission (client-side)
+8. Responsive design refinements
+
+## Phase 3: Dark Mode & Theming
+**Goal:** Add visual polish and theme support
+
+### Features:
+1. Install and configure next-themes
+2. Dark mode toggle component (Shadcn Switch)
+3. System preference detection
+4. Update all Shadcn components with dark mode variants
+5. Smooth theme transitions
+6. Persist theme preference (localStorage)
+
+## Phase 4: PWA Implementation
+**Goal:** Make the app installable and work offline
+
+### Features:
+1. Create PWA manifest.json with app metadata
+2. Generate app icons (multiple sizes)
+3. Configure next-pwa plugin or custom service worker
+4. Implement caching strategy (Network-first for extractions)
+5. Add offline fallback page
+6. Test installation on mobile and desktop
+7. Add "Install App" prompt for supported browsers
+
+## Phase 5: Polish & Optimization
+**Goal:** Final touches and performance optimization
+
+### Features:
+1. Add keyboard shortcuts (Ctrl/Cmd+Enter to extract, Ctrl/Cmd+C for copy)
+2. Accessibility audit and improvements
+3. Performance optimization (code splitting, lazy loading)
+4. Add meta tags for SEO
+5. Error logging (optional, Sentry or similar)
+6. Add simple analytics (optional)
+7. Final cross-browser testing
+
+# Logical Dependency Chain
+
+**Foundation (Must be built first):**
+1. Next.js project setup with TypeScript, Tailwind, Shadcn UI
+2. Basic page structure and routing
+3. Server Action for content fetching and extraction
+
+**Core Loop (Gets us to something usable quickly):**
+4. Cheerio integration for HTML parsing
+5. Turndown integration for Markdown conversion
+6. Basic UI: Input → Button → Textarea
+7. Wire up Server Action to UI
+8. Display extracted Markdown
+
+**User Feedback (Critical for UX):**
+9. Loading states (skeleton loader)
+10. Error handling with specific messages
+11. Copy to Clipboard functionality
+12. Toast notifications
+
+**Enhancement Layer (Builds upon working foundation):**
+13. Clear button for input field
+14. Editable textarea
+15. Custom Markdown rules for JW.org specific content
+16. URL validation
+
+**Visual Polish (Can be done in parallel once core works):**
+17. Dark mode setup (next-themes)
+18. Theme toggle UI
+19. Update all components for dark mode
+20. Responsive design refinements
+
+**PWA Features (Independent, can be done last):**
+21. PWA manifest and icons
+22. Service worker setup
+23. Offline functionality
+24. Installation prompts
+
+**Final Polish (After everything else works):**
+25. Keyboard shortcuts
+26. Accessibility improvements
+27. Performance optimization
+
+# Risks and Mitigations  
+
+## Technical Challenges
+
+**Risk:** JW.org may change their HTML structure, breaking the `#content` selector
+**Mitigation:** 
+- Implement fallback selectors (multiple common class names)
+- Add detailed error logging to detect structure changes quickly
+- Version the scraping logic for easy updates
+
+**Risk:** CORS issues when fetching content from jw.org
+**Mitigation:** 
+- Use Next.js Server Actions (server-side fetching bypasses CORS)
+- Add proper headers in fetch requests
+- Fallback to proxy service if needed
+
+**Risk:** Rate limiting or blocking from jw.org servers
+**Mitigation:** 
+- Add respectful delays between requests (if batching is added later)
+- Include proper User-Agent header
+- Cache responses temporarily (optional future enhancement)
+
+**Risk:** Inconsistent article structures (questions, sidebars, special formatting)
+**Mitigation:** 
+- Start with basic conversion, iteratively add rules
+- Test with diverse article types from the beginning
+- Make conversion rules configurable/extensible
+
+## MVP Definition
+
+**Core MVP (Phase 1 must haves):**
+- URL input → Extract → Display Markdown → Copy
+- Basic error handling
+- Works for standard wol.jw.org articles
+
+**Nice-to-have (can be added post-MVP):**
+- Perfect Markdown formatting for all edge cases
+- PWA functionality
+- Dark mode
+- Advanced error messages
+
+**Not in scope for MVP:**
+- Multiple URLs at once
+- History of extractions
+- User accounts or authentication
+- Editing tools (formatting buttons, etc.)
+- Export to file (PDF, DOCX)
+- Support for other JW.org content types (videos, audio)
+
+## Resource Constraints
+
+**Time:** Aim for MVP in 1-2 development sessions (6-12 hours total)
+**Dependencies:** All libraries are free and open-source
+**Hosting:** Free tier on Vercel is sufficient
+**Maintenance:** Minimal, only if jw.org structure changes
+
+# Appendix  
+
+## Research Findings
+
+### JW.org URL Patterns
+- Main site: `https://www.jw.org/{locale}/library/...`
+- Watch Tower Online: `https://wol.jw.org/{locale}/wol/...`
+- Content div: `<div id="content" class="content">`
+- Common locales: `en`, `de`, `es`, `fr`, etc.
+
+### HTML to Markdown Conversion Libraries
+**Selected: Turndown.js**
+- Lightweight (33KB)
+- Extensible with custom rules
+- Handles complex HTML well
+- Active maintenance
+
+**Alternatives considered:**
+- rehype/remark (overkill for this use case)
+- html-to-markdown (less flexible)
+
+### PWA Implementation
+**Selected: next-pwa**
+- Easy Next.js integration
+- Good documentation
+- Automatic service worker generation
+- Workbox under the hood
+
+### UI Framework
+**Selected: Shadcn UI**
+- Built on Radix UI (accessible)
+- Tailwind-based (customizable)
+- Copy-paste components (no package bloat)
+- Dark mode support built-in
+
+## Technical Specifications
+
+### Browser Support
+- Chrome/Edge: 90+
+- Firefox: 88+
+- Safari: 14+
+- Mobile browsers: Modern versions
+
+### Performance Targets
+- First Contentful Paint: < 1.5s
+- Time to Interactive: < 3s
+- Extraction time: < 5s for typical article
+- Lighthouse Score: 90+ (all categories)
+
+### Accessibility Requirements
+- WCAG 2.1 Level AA compliance
+- Keyboard navigation support
+- Screen reader compatibility
+- Sufficient color contrast (both themes)
+
+### Security Considerations
+- No user data collection
+- Server Actions prevent client-side secrets
+- Content-Security-Policy headers
+- HTTPS only (enforced by Vercel)
+</PRD>
+
