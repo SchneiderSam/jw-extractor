@@ -4,12 +4,39 @@ import * as cheerio from 'cheerio';
 import type { ExtractionResult } from '@/lib/types';
 import { generateErrorMessage } from '@/lib/types';
 import { convertHtmlToMarkdown } from '@/lib/markdown-converter';
+import { withRetry } from '@/lib/extraction/retry-handler';
+import { logger } from '@/lib/extraction/logger';
 
 /**
  * Server Action to extract content from jw.org/wol.jw.org URLs
  * Fetches HTML, parses with Cheerio, extracts the #content div, and converts to Markdown
+ * Includes automatic retry logic with exponential backoff
  */
 export async function extractContent(url: string): Promise<ExtractionResult> {
+  // Log extraction start
+  logger.logExtractionStart(url);
+  const extractionStart = Date.now();
+
+  // Wrap extraction in retry handler
+  const result = await withRetry(async (attemptNumber: number) => {
+    return performExtraction(url, attemptNumber);
+  });
+
+  // Log extraction result
+  const extractionDuration = Date.now() - extractionStart;
+  if (result.success) {
+    logger.logExtractionSuccess(url, extractionDuration);
+  } else if (result.error) {
+    logger.logExtractionFailure(url, result.error.type, extractionDuration);
+  }
+
+  return result;
+}
+
+/**
+ * Internal extraction function (called by retry handler)
+ */
+async function performExtraction(url: string, attemptNumber: number): Promise<ExtractionResult> {
   try {
     // Validate URL format
     const jwOrgPattern = /^https?:\/\/(www\.)?jw\.org\/.+/i;
@@ -26,7 +53,7 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
     }
 
     // Fetch HTML from the URL
-    const fetchStart = Date.now();
+    logger.timeStart('fetch');
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -34,16 +61,17 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
       // Add timeout
       signal: AbortSignal.timeout(10000), // 10 second timeout
     });
-    const fetchDuration = Date.now() - fetchStart;
+    const fetchDuration = logger.timeEnd('fetch');
 
     if (!response.ok) {
       return {
         success: false,
         error: {
           type: 'FETCH_ERROR',
-          message: generateErrorMessage('FETCH_ERROR', { stage: 'fetch', timing: fetchDuration }),
+          message: generateErrorMessage('FETCH_ERROR', { stage: 'fetch', timing: fetchDuration, attemptNumber }),
           stage: 'fetch',
           timing: fetchDuration,
+          attemptNumber,
         },
       };
     }
@@ -51,6 +79,7 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
     const html = await response.text();
 
     // Parse HTML with Cheerio
+    logger.timeStart('parse');
     const $ = cheerio.load(html);
 
     // Extract the article title (H1 from header)
@@ -60,47 +89,67 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
       articleTitle = headerH1.text().trim();
     }
 
-    // Extract the #content div
-    const contentDiv = $('#content.content');
+    // Extract content using fallback selectors
+    // Try multiple selectors in order of preference
+    const FALLBACK_SELECTORS = [
+      '#content.content',  // Primary selector (current)
+      '#content',          // Without .content class
+      'article',           // Article tag
+      '.article-content',  // Alternative class
+      'main',              // Main content tag
+    ];
 
-    if (!contentDiv.length) {
-      return {
-        success: false,
-        error: {
-          type: 'PARSE_ERROR',
-          message: generateErrorMessage('PARSE_ERROR', { stage: 'parse' }),
-          stage: 'parse',
-        },
-      };
+    let extractedHtml: string | null = null;
+    let usedSelector = '';
+
+    for (const selector of FALLBACK_SELECTORS) {
+      const element = $(selector);
+      if (element.length) {
+        const html = element.html();
+        if (html && html.trim()) {
+          extractedHtml = html;
+          usedSelector = selector;
+          break;
+        }
+      }
     }
-
-    // Get the HTML content
-    const extractedHtml = contentDiv.html();
 
     if (!extractedHtml) {
+      logger.timeEnd('parse');
       return {
         success: false,
         error: {
           type: 'PARSE_ERROR',
-          message: generateErrorMessage('PARSE_ERROR', { stage: 'parse' }),
+          message: generateErrorMessage('PARSE_ERROR', { stage: 'parse', attemptNumber }),
           stage: 'parse',
+          attemptNumber,
         },
       };
     }
 
-    // Convert HTML to Markdown
+    // Log parsing success
+    const parseDuration = logger.timeEnd('parse');
+    logger.info(`Content found using selector: ${usedSelector}`, { selector: usedSelector, duration: parseDuration });
+
+    // Convert HTML to Markdown with fallback
+    logger.timeStart('convert');
     let markdown: string;
     try {
       markdown = convertHtmlToMarkdown(extractedHtml);
+      logger.timeEnd('convert');
     } catch (conversionError) {
-      return {
-        success: false,
-        error: {
-          type: 'CONVERSION_ERROR',
-          message: generateErrorMessage('CONVERSION_ERROR', { stage: 'convert' }),
-          stage: 'convert',
-        },
-      };
+      logger.warn('Markdown conversion failed, using plain text fallback', { error: conversionError });
+      
+      // Fallback: strip HTML tags for plain text
+      markdown = extractedHtml
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
+        .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '') // Remove styles
+        .replace(/<[^>]+>/g, '') // Remove all HTML tags
+        .replace(/\s+/g, ' ') // Collapse whitespace
+        .trim();
+      
+      logger.timeEnd('convert');
+      logger.info('Used plain text fallback for conversion');
     }
 
     // Prepend the article title if found
@@ -123,9 +172,10 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
           success: false,
           error: {
             type: 'TIMEOUT_ERROR',
-            message: generateErrorMessage('TIMEOUT_ERROR', { stage: 'fetch', timing: 10000 }),
+            message: generateErrorMessage('TIMEOUT_ERROR', { stage: 'fetch', timing: 10000, attemptNumber }),
             stage: 'fetch',
             timing: 10000,
+            attemptNumber,
           },
         };
       }
@@ -136,8 +186,9 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
           success: false,
           error: {
             type: 'FETCH_ERROR',
-            message: generateErrorMessage('FETCH_ERROR', { stage: 'fetch' }),
+            message: generateErrorMessage('FETCH_ERROR', { stage: 'fetch', attemptNumber }),
             stage: 'fetch',
+            attemptNumber,
           },
         };
       }

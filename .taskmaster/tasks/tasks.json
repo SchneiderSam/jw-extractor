@@ -69,7 +69,7 @@
           42,
           43
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -83,7 +83,7 @@
           42,
           43
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -99,13 +99,13 @@
           44,
           45
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-10-06T12:17:42.313Z",
-      "updated": "2025-10-24T04:59:29.195Z",
+      "updated": "2025-10-24T05:01:51.735Z",
       "description": "Tasks for master context"
     }
   }
