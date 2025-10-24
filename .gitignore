@@ -58,10 +58,6 @@ node_modules/
 *.sw?
 # OS specific
 
-# Task files
-# tasks.json
-# tasks/
-
 # PWA files
 /public/sw.js
 /public/workbox-*.js
@@ -69,3 +65,7 @@ node_modules/
 /public/sw.js.map
 /public/workbox-*.js.map
 /public/worker-*.js.map 
+
+# Task files
+# tasks.json
+# tasks/ 

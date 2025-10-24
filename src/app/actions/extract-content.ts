@@ -2,6 +2,7 @@
 
 import * as cheerio from 'cheerio';
 import type { ExtractionResult } from '@/lib/types';
+import { generateErrorMessage } from '@/lib/types';
 import { convertHtmlToMarkdown } from '@/lib/markdown-converter';
 
 /**
@@ -19,12 +20,13 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
         success: false,
         error: {
           type: 'INVALID_URL',
-          message: 'Invalid URL format. Please enter a valid jw.org or wol.jw.org link.',
+          message: generateErrorMessage('INVALID_URL'),
         },
       };
     }
 
     // Fetch HTML from the URL
+    const fetchStart = Date.now();
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -32,13 +34,16 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
       // Add timeout
       signal: AbortSignal.timeout(10000), // 10 second timeout
     });
+    const fetchDuration = Date.now() - fetchStart;
 
     if (!response.ok) {
       return {
         success: false,
         error: {
-          type: 'NETWORK_ERROR',
-          message: `The page is not reachable. Status: ${response.status}`,
+          type: 'FETCH_ERROR',
+          message: generateErrorMessage('FETCH_ERROR', { stage: 'fetch', timing: fetchDuration }),
+          stage: 'fetch',
+          timing: fetchDuration,
         },
       };
     }
@@ -62,8 +67,9 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
       return {
         success: false,
         error: {
-          type: 'CONTENT_NOT_FOUND',
-          message: 'Content could not be loaded. The page structure may have changed.',
+          type: 'PARSE_ERROR',
+          message: generateErrorMessage('PARSE_ERROR', { stage: 'parse' }),
+          stage: 'parse',
         },
       };
     }
@@ -75,14 +81,27 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
       return {
         success: false,
         error: {
-          type: 'CONTENT_NOT_FOUND',
-          message: 'Content could not be loaded. The #content div is empty.',
+          type: 'PARSE_ERROR',
+          message: generateErrorMessage('PARSE_ERROR', { stage: 'parse' }),
+          stage: 'parse',
         },
       };
     }
 
     // Convert HTML to Markdown
-    let markdown = convertHtmlToMarkdown(extractedHtml);
+    let markdown: string;
+    try {
+      markdown = convertHtmlToMarkdown(extractedHtml);
+    } catch (conversionError) {
+      return {
+        success: false,
+        error: {
+          type: 'CONVERSION_ERROR',
+          message: generateErrorMessage('CONVERSION_ERROR', { stage: 'convert' }),
+          stage: 'convert',
+        },
+      };
+    }
 
     // Prepend the article title if found
     if (articleTitle) {
@@ -103,8 +122,10 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
         return {
           success: false,
           error: {
-            type: 'NETWORK_ERROR',
-            message: 'The page is not reachable. Request timed out.',
+            type: 'TIMEOUT_ERROR',
+            message: generateErrorMessage('TIMEOUT_ERROR', { stage: 'fetch', timing: 10000 }),
+            stage: 'fetch',
+            timing: 10000,
           },
         };
       }
@@ -114,8 +135,9 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
         return {
           success: false,
           error: {
-            type: 'NETWORK_ERROR',
-            message: 'The page is not reachable. Please check your internet connection.',
+            type: 'FETCH_ERROR',
+            message: generateErrorMessage('FETCH_ERROR', { stage: 'fetch' }),
+            stage: 'fetch',
           },
         };
       }
@@ -126,7 +148,7 @@ export async function extractContent(url: string): Promise<ExtractionResult> {
       success: false,
       error: {
         type: 'NETWORK_ERROR',
-        message: 'An unexpected error occurred. Please try again.',
+        message: generateErrorMessage('NETWORK_ERROR'),
       },
     };
   }

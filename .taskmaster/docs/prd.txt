@@ -1,0 +1,189 @@
+# Product Requirements Document: JW Extractor - Error Handling & Retry Fix
+
+## Problem Statement
+Extraction sometimes fails and requires 2-3 manual attempts to succeed. Error messages are generic and don't help identify what went wrong (network, parsing, conversion, etc.).
+
+## Goal
+Fix extraction reliability with automatic retries and provide better error messages so we can actually debug issues.
+
+## Scope (Minimal Fix)
+This is a focused bug fix, NOT a major rewrite. Keep changes minimal and surgical.
+
+## Core Requirements
+
+### 1. Enhanced Error Types & Messages
+**Current Problem:**
+- Only 3 error types (INVALID_URL, CONTENT_NOT_FOUND, NETWORK_ERROR)
+- Generic messages like "An unexpected error occurred"
+- Can't tell if it was network, timeout, parsing, or conversion that failed
+
+**Solution:**
+- Add specific error types:
+  - FETCH_ERROR (network connection issues)
+  - TIMEOUT_ERROR (request timeout)
+  - PARSE_ERROR (HTML parsing failed)
+  - CONVERSION_ERROR (Markdown conversion failed)
+- Include basic context:
+  - Which stage failed (fetch, parse, convert)
+  - Attempt number if retrying
+  - Timing information
+
+**Implementation:**
+- Extend the ErrorType enum in `src/lib/types.ts`
+- Add optional `stage` and `attemptNumber` fields to error object
+- Update error messages to be more specific
+
+### 2. Automatic Retry Logic
+**Current Problem:**
+- Single attempt, then fails
+- User must manually retry 2-3 times
+- No exponential backoff or smart retry strategy
+
+**Solution:**
+- Wrap extraction in retry handler
+- Maximum 3 attempts
+- Exponential backoff: 1s, 2s, 4s between attempts
+- Only retry on transient errors (timeout, network, parse)
+- Don't retry on permanent errors (invalid URL)
+
+**Implementation:**
+- Create simple `src/lib/extraction/retry-handler.ts` utility
+- Add retry wrapper around existing extraction logic
+- Show "Retrying (attempt 2 of 3)..." to user
+
+### 3. Basic Logging for Debugging
+**Current Problem:**
+- No visibility into what's happening during extraction
+- Hard to debug production issues
+
+**Solution:**
+- Simple console logging in development
+- Log key stages: fetch start/end, parse start/end, convert start/end
+- Log timing for performance visibility
+- Log which retry attempt succeeded
+
+**Implementation:**
+- Create minimal `src/lib/extraction/logger.ts` with console.log wrappers
+- Add timing logs at each stage
+- Include in error context
+
+### 4. Simple HTML Parsing Fallback (Optional)
+**Current Problem:**
+- If `#content.content` selector fails, extraction fails
+- HTML structure might have variations
+
+**Solution (Keep It Simple):**
+- Try `#content.content` (current)
+- If that fails, try `#content` (without .content class)
+- If that fails, try `article` tag
+- Log which selector worked
+
+**Implementation:**
+- Add fallback selector array to existing parse logic
+- Try each selector in order until one returns content
+- Log which worked for debugging
+
+### 5. Markdown Conversion Error Handling
+**Current Problem:**
+- If Turndown conversion fails, entire extraction fails
+- No error recovery
+
+**Solution:**
+- Wrap Turndown in try-catch
+- On error, attempt conversion with simpler rules
+- Final fallback: return plain text (strip all HTML tags)
+
+**Implementation:**
+- Wrap existing `convertHtmlToMarkdown` in try-catch
+- Add simple fallback that strips HTML tags
+- Log which conversion method worked
+
+## Implementation Tasks (5 Tasks Total)
+
+### Task 1: Enhanced Error Type System
+- Extend ErrorType enum
+- Add error context fields (stage, attemptNumber, timing)
+- Update type definitions
+- **Complexity:** Low
+
+### Task 2: Simple Logging Utility
+- Create basic logger with console.log
+- Add timing utilities
+- Add stage tracking
+- **Complexity:** Low
+
+### Task 3: Retry Handler with Exponential Backoff
+- Create retry wrapper function
+- Implement exponential backoff (1s, 2s, 4s)
+- Determine which errors should retry
+- Add cancellation support
+- **Complexity:** Medium
+
+### Task 4: HTML Parsing Fallback Selectors
+- Create array of fallback selectors
+- Try each until one returns content
+- Log which selector worked
+- **Complexity:** Low
+
+### Task 5: Integrate Everything into Extract Content
+- Add retry wrapper around extraction
+- Use enhanced error types
+- Add logging at each stage
+- Integrate parsing fallbacks
+- Add Markdown conversion try-catch
+- Update UI to show retry attempts
+- **Complexity:** Medium-High
+
+## Technical Changes
+
+### New Files (Minimal)
+- `src/lib/extraction/retry-handler.ts` (~80 lines)
+- `src/lib/extraction/logger.ts` (~40 lines)
+
+### Modified Files
+- `src/lib/types.ts` - Add error types
+- `src/app/actions/extract-content.ts` - Add retry, logging, fallbacks
+- `src/lib/markdown-converter.ts` - Add try-catch wrapper
+- `src/app/page.tsx` - Show retry attempt in UI (minimal change)
+
+## Success Criteria
+- ✅ Extraction succeeds on first try 90%+ of the time (due to automatic retries)
+- ✅ Error messages clearly state what failed and at which stage
+- ✅ No more than 3 automatic retry attempts
+- ✅ Users see "Retrying..." instead of generic failure
+- ✅ Development console shows detailed timing logs
+
+## What We're NOT Doing (Out of Scope)
+- ❌ Caching system (can add later if needed)
+- ❌ Analytics and metrics tracking (overkill for now)
+- ❌ Debug panel UI (not essential)
+- ❌ Configuration settings (use sensible defaults)
+- ❌ Adaptive timeouts (keep current 10s timeout)
+- ❌ Comprehensive test suite (add tests incrementally as needed)
+- ❌ Security enhancements (current validation is fine)
+- ❌ Fancy status display components (minimal UI changes only)
+
+## Estimated Effort
+- **Total:** 1-2 days for a focused developer
+- **Task 1:** 1 hour (types)
+- **Task 2:** 1 hour (logger)
+- **Task 3:** 3-4 hours (retry logic)
+- **Task 4:** 1-2 hours (fallback selectors)
+- **Task 5:** 4-5 hours (integration)
+
+## Risk Mitigation
+This is a low-risk change because:
+- No architecture changes
+- Minimal new code
+- Backward compatible
+- Can be rolled back easily
+- No database or external dependencies
+
+## Testing Strategy
+- Test with URLs that currently fail
+- Test with URLs that currently succeed
+- Verify retry logic with simulated failures
+- Check error messages are helpful
+- Verify console logs in development
+
+This is a surgical fix, not a rewrite. Keep it simple.

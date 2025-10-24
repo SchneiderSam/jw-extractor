@@ -2,330 +2,110 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
-        "title": "Initialize Next.js Project with TypeScript and Tailwind",
-        "description": "Set up a new Next.js 15+ project using the App Router, TypeScript, and Tailwind CSS via Shadcn UI.",
-        "details": "Run `npx create-next-app@latest` with TypeScript and Tailwind CSS. Install Shadcn UI components (Input, Textarea, Button, Toast, Skeleton) and Lucide React icons. Configure Tailwind for responsive design. Ensure project structure is clean and ready for further development.",
-        "testStrategy": "Verify project starts without errors. Confirm TypeScript and Tailwind are correctly integrated. Test basic Shadcn UI components render in a sample page.",
+        "id": 42,
+        "title": "Enhanced Error Type System",
+        "description": "Extend the existing error type system to include specific error types for different failure stages and add context fields for better debugging",
+        "details": "1. Extend ErrorType enum in `src/lib/types.ts` to include: FETCH_ERROR, TIMEOUT_ERROR, PARSE_ERROR, CONVERSION_ERROR\n2. Add optional fields to error object: `stage` (string), `attemptNumber` (number), `timing` (number)\n3. Update error message generation to be more specific based on error type\n4. Ensure backward compatibility with existing error handling\n\nPseudo-code:\n```typescript\nenum ErrorType {\n  INVALID_URL = 'INVALID_URL',\n  CONTENT_NOT_FOUND = 'CONTENT_NOT_FOUND', \n  NETWORK_ERROR = 'NETWORK_ERROR',\n  FETCH_ERROR = 'FETCH_ERROR',\n  TIMEOUT_ERROR = 'TIMEOUT_ERROR',\n  PARSE_ERROR = 'PARSE_ERROR',\n  CONVERSION_ERROR = 'CONVERSION_ERROR'\n}\n\ninterface ExtractionError {\n  type: ErrorType;\n  message: string;\n  stage?: string;\n  attemptNumber?: number;\n  timing?: number;\n}\n```",
+        "testStrategy": "1. Verify all new error types are properly defined\n2. Test error object creation with optional fields\n3. Validate error messages are more descriptive than before\n4. Ensure existing error handling still works\n5. Test TypeScript compilation with new types",
         "priority": "high",
         "dependencies": [],
         "status": "done",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Extend ErrorType Enum and Error Interface",
+            "description": "Extend the existing ErrorType enum in src/lib/types.ts to include new specific error types and add optional context fields to the error object structure",
+            "dependencies": [],
+            "details": "1. Open src/lib/types.ts and locate the existing ErrorType enum\n2. Add new error types: FETCH_ERROR, TIMEOUT_ERROR, PARSE_ERROR, CONVERSION_ERROR\n3. Extend the ExtractionError interface to include optional fields: stage (string), attemptNumber (number), timing (number)\n4. Ensure all existing error types remain unchanged for backward compatibility\n5. Export the updated types for use in other modules\n<info added on 2025-10-24T04:57:16.009Z>\n✅ Completed subtask 42.1\n\nExtended the error type system in src/lib/types.ts:\n- Added 4 new specific error types: FETCH_ERROR, TIMEOUT_ERROR, PARSE_ERROR, CONVERSION_ERROR\n- Created new ExtractionStage type for stage identification ('fetch', 'parse', 'convert')\n- Created ExtractionError interface with optional context fields:\n  - stage?: ExtractionStage\n  - attemptNumber?: number\n  - timing?: number (in milliseconds)\n- Updated ExtractionResult to use the new ExtractionError interface\n- All changes are backward compatible - existing code will still work\n\nThe types are now ready for use in the logging system (Task 43) and retry handler (Task 44).\n</info added on 2025-10-24T04:57:16.009Z>",
+            "status": "done",
+            "testStrategy": "1. Verify TypeScript compilation succeeds with new types\n2. Test that all new error types are properly defined and accessible\n3. Validate that error objects can be created with and without optional fields\n4. Ensure existing code using old error types still compiles and works"
+          },
+          {
+            "id": 2,
+            "title": "Create Error Message Generation Function",
+            "description": "Implement a centralized error message generation function that creates specific, contextual error messages based on the error type and optional context fields",
+            "dependencies": [
+              "42.1"
+            ],
+            "details": "1. Create a new function generateErrorMessage in src/lib/types.ts or a separate error utilities file\n2. Implement switch/case logic for each ErrorType to generate specific messages\n3. Include context information (stage, attemptNumber, timing) in messages when available\n4. For FETCH_ERROR: 'Failed to fetch content from URL'\n5. For TIMEOUT_ERROR: 'Request timed out after X seconds'\n6. For PARSE_ERROR: 'Failed to parse content at stage X'\n7. For CONVERSION_ERROR: 'Failed to convert content to markdown'\n8. Maintain existing message formats for backward compatibility\n<info added on 2025-10-24T04:57:41.948Z>\nIMPLEMENTATION COMPLETED:\n\n✅ Successfully implemented generateErrorMessage function in src/lib/types.ts\n✅ Function provides centralized error message generation with context-aware messaging\n✅ Handles all 7 error types (FETCH_ERROR, TIMEOUT_ERROR, PARSE_ERROR, CONVERSION_ERROR, INVALID_URL, CONTENT_NOT_FOUND, NETWORK_ERROR)\n✅ Supports optional context fields: stage, attemptNumber, timing\n✅ Generated messages are user-friendly and actionable:\n  - TIMEOUT_ERROR: \"Request timed out after 10.0s during fetch stage (attempt 2)\"\n  - PARSE_ERROR: \"Failed to parse HTML content during parse stage (attempt 1)\"\n  - FETCH_ERROR: \"Failed to fetch content from URL during fetch stage. Please check your internet connection.\"\n✅ Maintains backward compatibility with existing error types\n✅ Ready for integration in extract-content.ts (Task 42.3)\n</info added on 2025-10-24T04:57:41.948Z>",
+            "status": "done",
+            "testStrategy": "1. Test message generation for each new error type\n2. Verify messages include context fields when provided\n3. Test with and without optional fields\n4. Ensure backward compatibility with existing error types\n5. Validate message clarity and usefulness for debugging"
+          },
+          {
+            "id": 3,
+            "title": "Update Error Creation and Usage Points",
+            "description": "Update all existing error creation points throughout the codebase to use the new error types and message generation function while maintaining backward compatibility",
+            "dependencies": [
+              "42.1",
+              "42.2"
+            ],
+            "details": "1. Identify all locations where errors are currently created in the extraction pipeline\n2. Update fetch-related errors to use FETCH_ERROR type\n3. Update timeout-related errors to use TIMEOUT_ERROR type\n4. Update parsing errors to use PARSE_ERROR type\n5. Update conversion errors to use CONVERSION_ERROR type\n6. Add stage, attemptNumber, and timing context where appropriate\n7. Use the new generateErrorMessage function for consistent error messages\n8. Ensure all error handling code can still process both old and new error formats",
+            "status": "done",
+            "testStrategy": "1. Test error creation at each stage of the extraction pipeline\n2. Verify that errors include appropriate context fields\n3. Test that error messages are more descriptive than before\n4. Ensure existing error handling logic still works\n5. Validate that UI can display new error information properly"
+          }
+        ]
       },
       {
-        "id": 2,
-        "title": "Implement URL Input with Validation",
-        "description": "Create a single-page UI with a Shadcn UI Input field for jw.org/wol.jw.org URLs, including real-time validation and a clear button.",
-        "details": "Add a Shadcn UI Input component. Implement client-side regex validation for jw.org/wol.jw.org URLs. Display error messages for invalid formats. Add a clear button to reset the input. Ensure responsive design works on mobile and desktop.",
-        "testStrategy": "Test with valid and invalid URLs. Verify error messages appear correctly. Test clear button functionality. Check responsiveness across devices.",
-        "priority": "high",
-        "dependencies": [
-          1
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 3,
-        "title": "Develop Server Action for Content Extraction",
-        "description": "Create a Next.js Server Action to fetch HTML from the provided URL, parse it with Cheerio, and extract the #content div.",
-        "details": "Define a Server Action `extractContent(url: string): Promise<ExtractionResult>`. Use fetch/axios to get HTML. Parse with Cheerio, targeting `#content.content`. Return extracted HTML or error if not found. Handle network errors gracefully.",
-        "testStrategy": "Test with various jw.org/wol.jw.org URLs. Verify correct extraction of #content div. Test error cases (invalid URL, network error, content not found).",
-        "priority": "high",
-        "dependencies": [
-          1
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 4,
-        "title": "Integrate HTML-to-Markdown Conversion",
-        "description": "Convert extracted HTML to Markdown using Turndown.js with basic rules for headings, lists, quotes, and paragraphs.",
-        "details": "Install Turndown.js. Create a conversion function that preserves headings, lists, blockquotes, and paragraphs. Ignore headers, footers, sidebars, and images. Return clean Markdown string.",
-        "testStrategy": "Test conversion with sample HTML from jw.org. Verify Markdown output matches expected structure. Check that unwanted elements (headers, footers) are omitted.",
-        "priority": "high",
-        "dependencies": [
-          3
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 5,
-        "title": "Display Markdown in Editable Textarea",
-        "description": "Show the converted Markdown in a large, editable Shadcn UI Textarea component.",
-        "details": "Add a Shadcn UI Textarea to the page. Populate it with the Markdown output from the Server Action. Ensure the textarea is editable and maintains formatting. Make it responsive.",
-        "testStrategy": "Verify Markdown displays correctly after extraction. Test editing functionality. Check responsiveness on different devices.",
-        "priority": "high",
-        "dependencies": [
-          2,
-          4
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 6,
-        "title": "Implement Copy to Clipboard with Toast Feedback",
-        "description": "Add a button to copy Markdown to clipboard using the Clipboard API, with a Shadcn Toast notification on success.",
-        "details": "Add a Shadcn UI Button next to the textarea. Use `navigator.clipboard.writeText()` to copy Markdown. Show a Shadcn Toast/Sonner notification confirming the copy. Use a Lucide icon for visual clarity.",
-        "testStrategy": "Test copy functionality in supported browsers. Verify toast appears on success. Check fallback behavior if Clipboard API is unavailable.",
+        "id": 43,
+        "title": "Simple Logging Utility",
+        "description": "Create a minimal logging utility for development debugging with timing capabilities and stage tracking",
+        "details": "1. Create `src/lib/extraction/logger.ts` with console.log wrappers\n2. Add timing utilities to measure stage duration\n3. Include stage tracking for extraction pipeline\n4. Only log in development environment\n5. Keep it simple with basic console output\n\nPseudo-code:\n```typescript\nclass ExtractionLogger {\n  private startTime: number;\n  \n  logStageStart(stage: string) {\n    if (process.env.NODE_ENV === 'development') {\n      console.log(`[Extraction] ${stage} started`);\n      this.startTime = Date.now();\n    }\n  }\n  \n  logStageEnd(stage: string) {\n    if (process.env.NODE_ENV === 'development') {\n      const duration = Date.now() - this.startTime;\n      console.log(`[Extraction] ${stage} completed in ${duration}ms`);\n    }\n  }\n  \n  logRetryAttempt(attempt: number, maxAttempts: number) {\n    console.log(`[Extraction] Retrying (attempt ${attempt} of ${maxAttempts})...`);\n  }\n}\n```",
+        "testStrategy": "1. Test logging only occurs in development environment\n2. Verify timing calculations are accurate\n3. Test stage start/end logging pairs\n4. Validate retry attempt logging format\n5. Ensure no performance impact in production",
         "priority": "medium",
         "dependencies": [
-          5
+          42
         ],
-        "status": "done",
+        "status": "pending",
         "subtasks": []
       },
       {
-        "id": 7,
-        "title": "Add Loading States and Skeleton Loader",
-        "description": "Implement visual feedback during content extraction, including a pulsing skeleton loader.",
-        "details": "Add a loading state to the UI when the Server Action is running. Use Shadcn UI Skeleton component as a pulsing loader. Show the skeleton over the textarea area during processing.",
-        "testStrategy": "Verify loader appears during extraction and disappears when done. Test with slow network conditions. Ensure UI remains responsive.",
+        "id": 44,
+        "title": "Retry Handler with Exponential Backoff",
+        "description": "Implement automatic retry logic with exponential backoff for transient errors during extraction",
+        "details": "1. Create `src/lib/extraction/retry-handler.ts` with retry wrapper function\n2. Implement exponential backoff: 1s, 2s, 4s between attempts\n3. Maximum 3 attempts total\n4. Only retry transient errors (FETCH_ERROR, TIMEOUT_ERROR, PARSE_ERROR)\n5. Don't retry permanent errors (INVALID_URL)\n6. Add cancellation support for user interruption\n\nPseudo-code:\n```typescript\ninterface RetryConfig {\n  maxAttempts: number;\n  baseDelay: number;\n  retryableErrors: ErrorType[];\n}\n\nasync function withRetry<T>(\n  operation: () => Promise<T>,\n  config: RetryConfig,\n  logger: ExtractionLogger\n): Promise<T> {\n  let lastError: ExtractionError;\n  \n  for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {\n    try {\n      return await operation();\n    } catch (error) {\n      lastError = error;\n      \n      if (!config.retryableErrors.includes(error.type) || attempt === config.maxAttempts) {\n        throw error;\n      }\n      \n      const delay = config.baseDelay * Math.pow(2, attempt - 1) * 1000;\n      logger.logRetryAttempt(attempt + 1, config.maxAttempts);\n      await new Promise(resolve => setTimeout(resolve, delay));\n    }\n  }\n  \n  throw lastError;\n}\n```",
+        "testStrategy": "1. Test retry logic with simulated transient failures\n2. Verify exponential backoff timing (1s, 2s, 4s)\n3. Test that permanent errors don't retry\n4. Validate maximum attempt limit is respected\n5. Test cancellation functionality\n6. Verify error propagation after max attempts",
+        "priority": "high",
+        "dependencies": [
+          42,
+          43
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 45,
+        "title": "HTML Parsing Fallback Selectors",
+        "description": "Implement fallback selector strategy for HTML parsing to handle variations in JW.org content structure",
+        "details": "1. Create array of fallback selectors in order of preference\n2. Try `#content.content` (current), then `#content`, then `article`\n3. Return content from first successful selector\n4. Log which selector worked for debugging\n5. Modify existing parse logic to use fallback strategy\n\nPseudo-code:\n```typescript\nconst FALLBACK_SELECTORS = [\n  '#content.content',\n  '#content', \n  'article',\n  '.article-content',\n  'main'\n];\n\nfunction parseContentWithFallback(html: string, logger: ExtractionLogger): string {\n  const $ = cheerio.load(html);\n  \n  for (const selector of FALLBACK_SELECTORS) {\n    const content = $(selector).html();\n    if (content && content.trim()) {\n      logger.logStageEnd(`Parse (using ${selector})`);\n      return content;\n    }\n  }\n  \n  throw new ExtractionError({\n    type: ErrorType.PARSE_ERROR,\n    message: 'No content found with any fallback selector',\n    stage: 'parse'\n  });\n}\n```",
+        "testStrategy": "1. Test with HTML that matches primary selector\n2. Test with HTML that only matches fallback selectors\n3. Test with HTML that matches no selectors\n4. Verify logging shows which selector worked\n5. Test with various JW.org page structures\n6. Validate error handling when no selector works",
         "priority": "medium",
         "dependencies": [
-          2,
-          5
+          42,
+          43
         ],
-        "status": "done",
+        "status": "pending",
         "subtasks": []
       },
       {
-        "id": 8,
-        "title": "Enhance Error Handling with Specific Messages",
-        "description": "Display clear, specific error messages for invalid URLs, content not found, and network errors.",
-        "details": "Extend error handling in the Server Action to distinguish between invalid URL, content not found, and network error. Surface these errors in the UI with descriptive messages. Style errors for visibility.",
-        "testStrategy": "Test each error scenario. Verify correct error message is shown. Check that errors are cleared on retry or input change.",
-        "priority": "medium",
-        "dependencies": [
-          2,
-          3
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 9,
-        "title": "Implement Dark Mode with System Preference Detection",
-        "description": "Add dark mode support using next-themes, including system preference detection and a manual toggle.",
-        "details": "Install next-themes. Add a Shadcn UI Switch for manual theme toggling. Detect system preference. Update all Shadcn components to support dark mode. Persist preference in localStorage. Ensure smooth transitions.",
-        "testStrategy": "Test theme switching manually and via system preference. Verify all components adapt to dark/light mode. Check persistence after page reload.",
-        "priority": "low",
-        "dependencies": [
-          1
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 10,
-        "title": "Refine Markdown Conversion for JW.org Specific Elements",
-        "description": "Extend Turndown.js rules to handle question boxes, scripture citations, and other JW.org-specific formatting.",
-        "details": "Analyze JW.org HTML structure for question boxes (`div.questionBox`), scripture citations, and special formatting. Add custom Turndown.js rules to preserve these elements in Markdown. Test with diverse article types.",
-        "testStrategy": "Test conversion with articles containing question boxes and scripture citations. Verify special formatting is preserved in Markdown output.",
-        "priority": "medium",
-        "dependencies": [
-          4
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 11,
-        "title": "Implement PWA Features (Manifest, Service Worker, Offline Support)",
-        "description": "Make the app installable as a PWA with a manifest, service worker, and offline support for already-extracted content.",
-        "details": "Create a `manifest.json` with app metadata and icons. Configure next-pwa or a custom service worker. Implement caching strategy (network-first for extractions, cache-first for assets). Add offline fallback page. Test installation prompt on supported browsers.",
-        "testStrategy": "Verify PWA installation on mobile and desktop. Test offline access to previously extracted content. Check that new extractions require network.",
-        "priority": "low",
-        "dependencies": [
-          1
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 12,
-        "title": "Conduct Accessibility Audit and Final Polish",
-        "description": "Perform an accessibility audit, add keyboard shortcuts, and optimize performance.",
-        "details": "Audit for WCAG 2.1 AA compliance (keyboard nav, screen reader, color contrast). Add keyboard shortcuts (Ctrl/Cmd+Enter to extract, Ctrl/Cmd+C to copy). Optimize performance (code splitting, lazy loading). Add meta tags for SEO. Conduct cross-browser testing.",
-        "testStrategy": "Use automated and manual accessibility testing tools. Verify keyboard shortcuts work. Measure performance metrics (Lighthouse). Test in target browsers.",
-        "priority": "low",
-        "dependencies": [
-          1,
-          2,
-          5,
-          6
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 13,
-        "title": "Integrate Tweakcn Theme Editor for Shadcn UI Customization",
-        "description": "Add Tweakcn-generated styling code to the project and integrate its theme customization functionality into the existing Shadcn UI setup for enhanced branding and UI distinctiveness.",
-        "details": "Begin by visiting the Tweakcn web-based theme editor and use its visual controls (sliders, color pickers, typography settings) to design a custom theme for your Shadcn UI components. Export the generated CSS variables or JSON preset from Tweakcn. Integrate these variables into your project's Tailwind configuration (e.g., `tailwind.config.js` for v3/v4 or the new theme file) and/or global stylesheet (`globals.css`). Ensure that all Shadcn UI components reference the new theme variables for colors, radii, and typography. Test the integration by previewing components and confirming that the custom styles are applied consistently. Document the integration steps and update README with instructions for future theme changes. Consider version-controlling the exported theme preset for team collaboration and future updates.",
-        "testStrategy": "Verify that all Shadcn UI components reflect the customized theme in both light and dark modes. Check that color, typography, and spacing changes from Tweakcn are applied consistently across the app. Test real-time updates by modifying theme variables and observing immediate UI changes. Confirm accessibility contrast checks using Tweakcn's preview and manual inspection. Ensure no regressions in component functionality or layout. Review documentation for clarity and completeness.",
-        "status": "done",
-        "dependencies": [
-          1,
-          9
-        ],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
-        "id": 14,
-        "title": "Filter Out 'Your Answer' Textarea Fields During Markdown Conversion",
-        "description": "Remove all '.gen-field' divs containing 'Your Answer' textarea fields from JW.org article HTML during extraction or markdown conversion so they do not appear in the final output.",
-        "details": "Update the HTML extraction and/or Turndown.js markdown conversion logic to specifically identify and exclude all '.gen-field' divs that contain textarea fields intended for reader notes (commonly labeled 'Your Answer').\n\nImplementation steps:\n- In the HTML extraction phase (Cheerio), locate and remove all elements matching the selector '.gen-field textarea' or their parent '.gen-field' divs before passing the HTML to markdown conversion.\n- Alternatively, add a custom Turndown.js rule that ignores '.gen-field' divs and their contents during markdown conversion.\n- Ensure that only the note-taking fields are removed, without affecting other interactive or content elements.\n- Test with multiple JW.org articles to confirm that all 'Your Answer' fields are filtered out, regardless of their position or nesting in the HTML.\n- Document the filtering logic and update relevant code comments for maintainability.",
-        "testStrategy": "Extract HTML from several JW.org articles known to contain 'Your Answer' textarea fields. Run the extraction and markdown conversion pipeline and verify that no remnants of '.gen-field' divs or textarea fields appear in the final markdown output. Check edge cases where these fields may be nested or styled differently. Confirm that other content is unaffected and markdown structure remains correct.",
-        "status": "done",
-        "dependencies": [
-          3,
-          4,
-          10
-        ],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
-        "id": 15,
-        "title": "Extract and Prepend Article Title (H1) to Markdown Output",
-        "description": "Extract the article's H1 title from the header and ensure it appears at the very top of the generated Markdown, while ignoring other header elements such as 'STUDIENARTIKEL' and 'LIED' references.",
-        "details": "Update the extraction and conversion pipeline to:\n\n- Use Cheerio to locate and extract the first <h1> element within the article's header or main content area before Markdown conversion.\n- Remove or ignore any other header elements (such as those containing 'STUDIENARTIKEL', 'LIED', or similar non-title references) to avoid their inclusion in the Markdown output.\n- Prepend the extracted H1 text as a Markdown heading (e.g., '# Article Title') at the very top of the final Markdown string, before any other content.\n- Ensure that the H1 is not duplicated if it would otherwise appear in the converted Markdown body.\n- Refactor the Turndown.js conversion logic if necessary to prevent unwanted header elements from being included, and to guarantee the correct placement of the article title.\n- Consider edge cases where the H1 may be missing, malformed, or located in an unexpected part of the DOM, and handle these gracefully (e.g., by omitting the title or logging a warning).\n\nExample implementation steps:\n1. In the extraction function, use Cheerio to select the first <h1> within the relevant header or content area.\n2. Remove this <h1> from the HTML before passing it to Turndown.js to avoid duplication.\n3. Convert the remaining HTML to Markdown as usual.\n4. Concatenate the Markdown-formatted title (e.g., '# Title') and the converted Markdown body, ensuring the title is at the very top.",
-        "testStrategy": "Test with a variety of JW.org articles, including those with and without H1 titles, and those with extra header elements like 'STUDIENARTIKEL' or 'LIED'.\n- Verify that the Markdown output always begins with the correct article title as a Markdown H1, and that no unwanted header elements appear.\n- Confirm that the title is not duplicated elsewhere in the Markdown.\n- Check edge cases where the H1 is missing or malformed, ensuring the output remains valid and no errors are thrown.\n- Compare output with expected Markdown for representative articles.",
-        "status": "done",
-        "dependencies": [
-          3,
-          4,
-          10,
-          14
-        ],
+        "id": 46,
+        "title": "Integrate Everything into Extract Content",
+        "description": "Integrate all error handling, retry logic, logging, and fallback mechanisms into the main extraction pipeline",
+        "details": "1. Wrap extraction in retry handler in `src/app/actions/extract-content.ts`\n2. Add logging at each extraction stage (fetch, parse, convert)\n3. Integrate parsing fallbacks into content extraction\n4. Add try-catch wrapper around Markdown conversion with plain text fallback\n5. Update UI in `src/app/page.tsx` to show retry attempts\n6. Ensure all error types are properly caught and categorized\n\nPseudo-code:\n```typescript\nexport async function extractContent(url: string): Promise<ExtractionResult> {\n  const logger = new ExtractionLogger();\n  const retryConfig = {\n    maxAttempts: 3,\n    baseDelay: 1,\n    retryableErrors: [ErrorType.FETCH_ERROR, ErrorType.TIMEOUT_ERROR, ErrorType.PARSE_ERROR]\n  };\n  \n  return withRetry(async () => {\n    // Fetch stage\n    logger.logStageStart('fetch');\n    const html = await fetchWithTimeout(url);\n    logger.logStageEnd('fetch');\n    \n    // Parse stage\n    logger.logStageStart('parse');\n    const content = parseContentWithFallback(html, logger);\n    logger.logStageEnd('parse');\n    \n    // Convert stage\n    logger.logStageStart('convert');\n    const markdown = await convertToMarkdownWithFallback(content, logger);\n    logger.logStageEnd('convert');\n    \n    return { content: markdown, url };\n  }, retryConfig, logger);\n}\n\nfunction convertToMarkdownWithFallback(html: string, logger: ExtractionLogger): string {\n  try {\n    return convertHtmlToMarkdown(html);\n  } catch (error) {\n    logger.logStageEnd('convert (fallback to plain text)');\n    return html.replace(/<[^>]*>/g, ''); // Strip HTML tags\n  }\n}\n```",
+        "testStrategy": "1. Test complete extraction pipeline with successful URLs\n2. Test with URLs that require retries\n3. Test with URLs that need fallback selectors\n4. Test Markdown conversion fallback\n5. Verify UI shows retry attempts\n6. Test error propagation and user feedback\n7. Validate logging output in development\n8. Test cancellation during retries",
         "priority": "high",
-        "subtasks": []
-      },
-      {
-        "id": 16,
-        "title": "Improve Markdown Formatting Quality",
-        "description": "Enhance the Markdown output by adding line breaks, reducing excessive bold formatting, converting headings to normal case, and removing image references.",
-        "details": "1. **Add Line Breaks**: Insert a line break after each paragraph and question to improve readability. 2. **Reduce Bold Formatting**: Minimize the use of double asterisks for bold text in questions, ensuring clarity without excessive emphasis. 3. **Convert Headings**: Change H2 headings from ALL CAPS to normal case for better readability. 4. **Remove Image References**: Completely eliminate image syntax (`![alt]`) from the output. 5. **Integration with Existing Tasks**: Ensure these changes are integrated into the Markdown conversion pipeline, particularly after tasks like HTML-to-Markdown conversion and JW.org-specific element handling.",
-        "testStrategy": "1. Test the updated Markdown output for correct line breaks and reduced bold formatting. 2. Verify that headings are in normal case. 3. Confirm that no image references remain. 4. Use sample articles to ensure these changes do not disrupt existing formatting or functionality.",
-        "status": "done",
         "dependencies": [
-          4,
-          10,
-          14
+          42,
+          43,
+          44,
+          45
         ],
-        "priority": "high",
-        "subtasks": []
-      },
-      {
-        "id": 17,
-        "title": "Fix Markdown Formatting Issues with Turndown Rules",
-        "description": "Adjust Turndown rules to correct paragraph and question formatting issues in Markdown output, ensuring proper separation and recognition of elements like paragraph numbers and italic quotes.",
-        "details": "1. **Analyze HTML Structure**: Carefully examine the HTML structure of the input content to identify elements that need special handling, such as paragraph numbers and questions. 2. **Customize Turndown Rules**: Use Turndown's `addRule` method to create custom rules for handling paragraph numbers, questions, and italic quotes. For example, add a rule to ensure paragraph numbers are on their own line or properly separated from the text. 3. **Implement Separation Logic**: Ensure questions are clearly separated from paragraph numbers by adding appropriate line breaks or formatting. 4. **Fix Bold/Italic Markers**: Adjust the rules to prevent mixing of bold and italic markers, ensuring clean and consistent formatting. 5. **Ensure Paragraph Line Breaks**: Modify the rules to start each paragraph on a new line after the paragraph number. 6. **Test with Diverse Content**: Test the updated rules with a variety of input HTML to ensure the fixes work across different scenarios.",
-        "testStrategy": "1. Test the updated Markdown output with sample HTML containing paragraph numbers, questions, and italic quotes. 2. Verify that paragraph numbers are correctly separated and questions are clearly distinguished. 3. Check that bold and italic markers are used consistently without mixing. 4. Confirm each paragraph starts on a new line after its number. 5. Use different types of input HTML to ensure the rules handle various formatting scenarios correctly.",
-        "status": "done",
-        "dependencies": [
-          4,
-          10,
-          16
-        ],
-        "priority": "high",
-        "subtasks": []
-      },
-      {
-        "id": 18,
-        "title": "Update Question and Paragraph Number Extraction Logic",
-        "description": "Revise the HTML extraction logic to correctly identify questions in <p class='qu'> elements and accurately extract paragraph numbers from <span class='parNum'> using the data-pnum attribute, ensuring proper Markdown formatting.",
-        "details": "Update the Cheerio-based extraction pipeline to target <p class='qu'> elements for questions, rather than <div> elements. For paragraph numbers, extract the value of the data-pnum attribute from <span class='parNum'> elements instead of relying on text content. Format extracted paragraph numbers as **[1]** in the Markdown output. Use Cheerio's .attr() method to read attribute values[3]. For questions, iterate through all matching <p class='qu'> elements and extract their text content. For paragraph numbers, locate all <span class='parNum'> elements, extract their data-pnum values, and prepend the formatted number to the corresponding paragraph in Markdown. Ensure this logic integrates seamlessly with the existing Turndown.js conversion rules for consistent output. Example Cheerio snippet for attribute extraction:\n\nconst $ = cheerio.load(html);\nconst parNum = $('.parNum').attr('data-pnum'); // Extracts '1' from <span class='parNum' data-pnum='1'></span>[3]\n\nFor multiple elements, use .each() to collect all values[3]. Update Turndown.js custom rules to handle the new HTML structure and attribute-based numbering.",
-        "testStrategy": "1. Test with sample HTML containing multiple <p class='qu'> questions and <span class='parNum' data-pnum='...'> elements. Verify that all questions are correctly identified and extracted, and that paragraph numbers are displayed as **[1]**, **[2]**, etc., based on the data-pnum attribute. 2. Check edge cases: articles with no questions, articles with no paragraph numbers, and articles with mixed content. 3. Confirm that the Markdown output maintains proper separation and formatting for both questions and paragraph numbers. 4. Validate that the extraction logic does not interfere with other Turndown.js rules or existing formatting enhancements.",
-        "status": "done",
-        "dependencies": [
-          3,
-          4,
-          10
-        ],
-        "priority": "high",
-        "subtasks": []
-      },
-      {
-        "id": 19,
-        "title": "Fix Missing Line Breaks After Questions in Markdown Output",
-        "description": "Ensure that each extracted question is followed by a proper line break so that questions do not run directly into paragraph numbers or subsequent content in the Markdown output.",
-        "details": "Update the Markdown conversion logic to guarantee that every question (extracted from <p class='qu'> elements) is followed by at least one line break (\\n or \\n\\n) before any subsequent paragraph number or content appears. This may require adjusting the Turndown.js custom rules or post-processing the Markdown output to insert a line break after each question block. Carefully review the output to ensure that questions are visually separated from paragraph numbers (e.g., **[1]**) and that no questions run into the next paragraph or content. Consider edge cases where multiple questions or questions followed by paragraphs occur. If necessary, add or modify Turndown rules to enforce this separation at the element level, ensuring consistent formatting regardless of input HTML variations.",
-        "testStrategy": "1. Prepare sample HTML containing multiple <p class='qu'> questions, each followed by paragraph numbers and content. 2. Run the extraction and Markdown conversion pipeline. 3. Verify that in the Markdown output, each question is followed by a line break, and that paragraph numbers or content always start on a new line after a question. 4. Check edge cases with consecutive questions, questions at the end of sections, and questions with or without following paragraphs. 5. Confirm that no questions run directly into paragraph numbers or other content in the output.",
-        "status": "done",
-        "dependencies": [
-          16,
-          17,
-          18
-        ],
-        "priority": "high",
-        "subtasks": []
-      },
-      {
-        "id": 20,
-        "title": "Fix Line Breaks After Questions in Markdown Output",
-        "description": "Ensure proper line breaks are inserted after questions in the Markdown output to prevent them from running into paragraph numbers or subsequent content.",
-        "details": "Update the Markdown conversion logic to guarantee that every question (extracted from `<p class='qu'>` elements) is followed by at least one line break (`\n` or `\n\n`) before any subsequent paragraph number or content appears. This may require adjusting the Turndown.js custom rules or post-processing the Markdown output to insert a line break after each question block. Carefully review the output to ensure that questions are visually separated from paragraph numbers (e.g., **[1]**) and that no question directly precedes a paragraph number without proper spacing.",
-        "testStrategy": "1. Prepare sample HTML containing multiple `<p class='qu'>` questions, each followed by paragraph numbers and content. 2. Run the extraction and Markdown conversion pipeline. 3. Verify that in the Markdown output, each question is followed by a line break, and that paragraph numbers or content always appear on a new line after questions.",
-        "status": "done",
-        "dependencies": [
-          18,
-          19
-        ],
-        "priority": "high",
-        "subtasks": []
-      },
-      {
-        "id": 21,
-        "title": "Change Paragraph Number Formatting to Inline Without Brackets",
-        "description": "Update the Markdown conversion logic so that paragraph numbers appear inline, directly before the paragraph text, as plain numbers without brackets or line breaks.",
-        "details": "Modify the extraction and Markdown conversion pipeline (including any Cheerio and Turndown.js custom rules) to change how paragraph numbers are formatted. Instead of outputting paragraph numbers on their own line with brackets (e.g., '**[2]**'), output them as plain numbers (e.g., '2') directly before the paragraph text, separated by a single space. Remove any logic that inserts line breaks or brackets around paragraph numbers. Ensure that this change does not interfere with the formatting of questions, headings, or other special elements. Carefully review the handling of <span class='parNum'> elements and update any post-processing steps to match the new format. Provide code comments and examples for maintainability. Example transformation: from '**[2]**\\nParagraph text.' to '2 Paragraph text.'",
-        "testStrategy": "1. Prepare sample HTML with multiple paragraphs containing <span class='parNum'> elements. 2. Run the extraction and Markdown conversion pipeline. 3. Verify that in the Markdown output, each paragraph number appears inline, directly before the paragraph text, as a plain number with a single space and no brackets or line breaks. 4. Confirm that no paragraph numbers appear on their own line or with brackets. 5. Check that questions, headings, and other formatting remain unaffected. 6. Test with edge cases such as missing or duplicate paragraph numbers.",
-        "status": "done",
-        "dependencies": [
-          16,
-          18,
-          20
-        ],
-        "priority": "high",
-        "subtasks": []
-      },
-      {
-        "id": 22,
-        "title": "Remove Invalid 'skipWaiting' Option from next-pwa Configuration to Fix Vercel Build Error",
-        "description": "Eliminate the unsupported 'skipWaiting' option from the next-pwa configuration in next.config.ts to resolve Vercel build errors caused by incompatibility with the @ducanh2912/next-pwa plugin.",
-        "details": "1. Open the project's next.config.ts (or next.config.js) file.\n2. Locate the next-pwa (or @ducanh2912/next-pwa) configuration block. This is typically where options like 'dest', 'register', and 'skipWaiting' are set.\n3. Remove the 'skipWaiting' property entirely from the configuration object. For example, change:\n\n```js\nconst withPWA = require('@ducanh2912/next-pwa')({\n  dest: 'public',\n  register: true,\n  skipWaiting: true, // REMOVE THIS LINE\n  // ...other options\n});\n```\n\n4. Ensure no other references to 'skipWaiting' exist in the configuration or related files.\n5. Save the file and commit the changes.\n6. If using a monorepo or custom build pipeline (e.g., Turborepo), ensure the configuration is updated in all relevant packages or apps.\n7. Review the @ducanh2912/next-pwa documentation to confirm supported options and avoid similar issues in the future.",
-        "testStrategy": "1. Run a local build (`next build`) and verify that no errors related to 'skipWaiting' or next-pwa configuration occur.\n2. Deploy the project to Vercel and confirm that the build completes successfully without configuration errors.\n3. Test PWA functionality in production to ensure service worker registration and offline support still work as expected.\n4. Review Vercel build logs to confirm the absence of previous errors and validate that the next-pwa plugin is functioning correctly.",
-        "status": "done",
-        "dependencies": [
-          11
-        ],
-        "priority": "high",
-        "subtasks": []
-      },
-      {
-        "id": 23,
-        "title": "Handle SVG Removal in Markdown Conversion with TypeScript",
-        "description": "Fix TypeScript errors in markdown-converter.ts where 'svg' is not recognized as a valid HTML element tag name for turndownService.remove(), and ensure SVG content is correctly excluded from the Markdown output.",
-        "details": "Turndown.js's TypeScript type definitions do not natively recognize 'svg' as a valid HTML element tag name, causing type errors when attempting to remove SVG elements via turndownService.remove(['svg'])[1]. To resolve this, implement a solution that either extends the Turndown.js type definitions to include SVG, or handles SVG removal in a type-safe way. Consider the following steps:\n\n- **Type Extension Approach**: Augment the Turndown.js module declarations to include 'svg' in the TagName type, allowing turndownService.remove(['svg']) to pass TypeScript checks. This can be done via a custom type declaration file (e.g., turndown.d.ts) that extends the existing types[1].\n- **Runtime Filtering**: Alternatively, pre-process the HTML using Cheerio to remove all <svg> elements before passing the content to Turndown.js. This avoids the type issue entirely and is semantically clear.\n- **Documentation**: Update project documentation to clarify how SVG handling is implemented, especially if a custom type augmentation is used.\n\nExample type augmentation (turndown.d.ts):\n```typescript\ndeclare module 'turndown' {\n  interface TurndownService {\n    remove(filter: (string | string[]) & { svg?: never }): this;\n  }\n}\n```\nOr, in Cheerio preprocessing:\n```typescript\n$('svg').remove();\nconst markdown = turndownService.turndown($.html());\n```\nChoose the approach that best fits the project's architecture and maintainability goals.",
-        "testStrategy": "1. Prepare test HTML samples containing various SVG elements, both inline and as part of complex structures.\n2. Run the markdown conversion pipeline and verify that no SVG content appears in the output.\n3. Confirm that TypeScript no longer reports errors related to 'svg' in turndownService.remove().\n4. If using type augmentation, verify that the custom type declaration does not conflict with other Turndown.js usage.\n5. Test edge cases, such as SVG inside other elements or SVG with specific attributes, to ensure complete removal.\n6. Document the chosen solution and update any relevant project documentation or comments.",
-        "status": "done",
-        "dependencies": [
-          1,
-          3
-        ],
-        "priority": "high",
+        "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-10-06T12:17:42.313Z",
-      "updated": "2025-10-06T13:17:15.229Z",
+      "updated": "2025-10-24T04:58:18.303Z",
       "description": "Tasks for master context"
     }
   }
