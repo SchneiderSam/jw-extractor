@@ -10,7 +10,11 @@ interface LogContext {
   attempt?: number;
   stage?: ExtractionStage;
   timing?: number;
-  [key: string]: any;
+  selector?: string;
+  duration?: number;
+  error?: unknown;
+  errorType?: string;
+  [key: string]: string | number | unknown | undefined;
 }
 
 class ExtractionLogger {
