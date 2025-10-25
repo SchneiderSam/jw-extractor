@@ -183,6 +183,24 @@ export default function Home() {
         // Record successful request for rate limiting
         AntiAbuseProtection.recordRequest();
         setRequestCount((prev) => prev + 1);
+
+        // Automatically copy to clipboard after successful extraction
+        try {
+          await navigator.clipboard.writeText(result.markdown);
+          setIsCopied(true);
+          toast.success('Automatisch kopiert!', {
+            description: 'Der Markdown-Inhalt wurde in die Zwischenablage kopiert.',
+          });
+
+          // Reset copied state after 2 seconds
+          setTimeout(() => {
+            setIsCopied(false);
+          }, 2000);
+        } catch {
+          toast.info('Extraktion erfolgreich', {
+            description: 'Bitte nutze den Copy-Button, um den Inhalt zu kopieren.',
+          });
+        }
       } else if (result.error) {
         setError(result.error.message);
       }
