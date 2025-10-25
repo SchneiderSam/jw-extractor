@@ -9,6 +9,12 @@ import { extractContent } from './actions/extract-content';
 import { toast } from 'sonner';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AntiAbuseProtection } from '@/lib/anti-abuse';
+import {
+  CooldownTimer,
+  RateLimitWarning,
+  BlockedRequestFeedback,
+} from '@/components/anti-abuse';
 
 export default function Home() {
   const [url, setUrl] = useState('');
@@ -18,13 +24,41 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
+  // Anti-abuse protection state
+  const [honeypot, setHoneypot] = useState('');
+  const [pageLoadTime] = useState(Date.now());
+  const [remainingDelay, setRemainingDelay] = useState(0);
+  const [requestCount, setRequestCount] = useState(0);
+  const [blockReason, setBlockReason] = useState<
+    'rate-limit' | 'bot-detected' | 'too-fast' | 'cooldown' | null
+  >(null);
+
+  // Update cooldown timer every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const delay = AntiAbuseProtection.getRemainingDelay();
+      setRemainingDelay(delay);
+
+      // Update request count
+      const result = AntiAbuseProtection.checkRateLimit();
+      setRequestCount(result.requestCount ?? 0);
+
+      // Clear block reason when cooldown expires
+      if (delay === 0 && blockReason) {
+        setBlockReason(null);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [blockReason]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl/Cmd + Enter to extract
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        if (url && !error && !isLoading) {
+        if (url && !error && !isLoading && remainingDelay === 0) {
           handleExtract();
         }
       }
@@ -39,7 +73,7 @@ export default function Home() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [url, error, isLoading, markdown]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [url, error, isLoading, markdown, remainingDelay]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Regex to validate jw.org and wol.jw.org URLs
   const validateUrl = (urlString: string): boolean => {
@@ -100,6 +134,39 @@ export default function Home() {
       return;
     }
 
+    // Anti-abuse protection checks
+    setBlockReason(null);
+
+    // Check 1: Rate limiting
+    const rateLimitResult = AntiAbuseProtection.checkRateLimit();
+    if (!rateLimitResult.allowed) {
+      setBlockReason(rateLimitResult.requestCount! >= 10 ? 'rate-limit' : 'cooldown');
+      setRemainingDelay(rateLimitResult.remainingTime ?? 0);
+      toast.error('Bitte warte einen Moment', {
+        description: `Du kannst in ${Math.ceil((rateLimitResult.remainingTime ?? 0) / 1000)} Sekunden fortfahren.`,
+      });
+      return;
+    }
+
+    // Check 2: Form timing validation
+    if (!AntiAbuseProtection.validateFormTiming(pageLoadTime)) {
+      setBlockReason('too-fast');
+      toast.error('Zu schnell!', {
+        description: 'Bitte nimm dir einen Moment Zeit.',
+      });
+      return;
+    }
+
+    // Check 3: Bot detection
+    const botResult = AntiAbuseProtection.detectBot(honeypot);
+    if (botResult.isBot) {
+      setBlockReason('bot-detected');
+      toast.error('Ungewöhnliche Aktivität', {
+        description: 'Bitte versuche es erneut.',
+      });
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     setMarkdown('');
@@ -111,6 +178,10 @@ export default function Home() {
       if (result.success && result.markdown) {
         setExtractedHtml(result.html || '');
         setMarkdown(result.markdown);
+
+        // Record successful request for rate limiting
+        AntiAbuseProtection.recordRequest();
+        setRequestCount((prev) => prev + 1);
       } else if (result.error) {
         setError(result.error.message);
       }
@@ -171,7 +242,7 @@ export default function Home() {
             </div>
             <Button
               onClick={handleExtract}
-              disabled={!url || !!error || isLoading}
+              disabled={!url || !!error || isLoading || remainingDelay > 0}
               className="shrink-0"
               aria-label="Extract content from URL"
             >
@@ -188,10 +259,46 @@ export default function Home() {
               )}
             </Button>
           </div>
+
+          {/* Honeypot field for bot detection (invisible) */}
+          <input
+            type="text"
+            name="website"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            style={{ display: 'none' }}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+          />
+
           {error && (
             <p id="url-error" className="text-sm text-red-500 font-medium" role="alert">
               {error}
             </p>
+          )}
+
+          {/* Anti-abuse feedback components */}
+          {remainingDelay > 0 && (
+            <CooldownTimer
+              remainingMs={remainingDelay}
+              onComplete={() => setRemainingDelay(0)}
+            />
+          )}
+
+          {requestCount > 0 && (
+            <RateLimitWarning requestCount={requestCount} maxRequests={10} />
+          )}
+
+          {blockReason && (
+            <BlockedRequestFeedback
+              reason={blockReason}
+              details={
+                blockReason === 'bot-detected'
+                  ? 'Bitte deaktiviere Browser-Erweiterungen oder automatisierte Tools.'
+                  : undefined
+              }
+            />
           )}
         </section>
 

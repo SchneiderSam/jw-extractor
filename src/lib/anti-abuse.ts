@@ -199,8 +199,15 @@ export class AntiAbuseProtection {
    * @returns Milliseconds until next request, or 0 if request can be made immediately
    */
   static getRemainingDelay(): number {
-    // TODO: Implement in subtask 51.4
-    throw new Error('Not implemented: getRemainingDelay will be implemented in subtask 51.4');
+    const result = this.checkRateLimit();
+    
+    // If request is allowed, no delay needed
+    if (result.allowed) {
+      return 0;
+    }
+    
+    // Return remaining time (defaults to 0 if not specified)
+    return result.remainingTime ?? 0;
   }
 
   // ============================================================
@@ -214,8 +221,34 @@ export class AntiAbuseProtection {
    * @returns BotDetectionResult indicating if bot was detected and why
    */
   static detectBot(honeypotValue: string): BotDetectionResult {
-    // TODO: Implement in subtask 51.3
-    throw new Error('Not implemented: detectBot will be implemented in subtask 51.3');
+    // Check 1: Honeypot field (should be empty for legitimate users)
+    if (honeypotValue && honeypotValue.trim().length > 0) {
+      return {
+        isBot: true,
+        reason: 'Honeypot field was filled',
+      };
+    }
+
+    // Check 2: JavaScript environment validation
+    if (!this.validateEnvironment()) {
+      return {
+        isBot: true,
+        reason: 'Invalid JavaScript environment',
+      };
+    }
+
+    // Check 3: User agent validation
+    if (!this.validateUserAgent()) {
+      return {
+        isBot: true,
+        reason: 'Suspicious user agent detected',
+      };
+    }
+
+    // All checks passed - appears to be legitimate user
+    return {
+      isBot: false,
+    };
   }
 
   /**
@@ -226,8 +259,11 @@ export class AntiAbuseProtection {
    * @returns true if timing is valid, false if submission was too fast
    */
   static validateFormTiming(startTime: number): boolean {
-    // TODO: Implement in subtask 51.3
-    throw new Error('Not implemented: validateFormTiming will be implemented in subtask 51.3');
+    const now = this.now();
+    const elapsed = now - startTime;
+
+    // Reject if submission is faster than MIN_FORM_INTERACTION_TIME (1 second)
+    return elapsed >= this.MIN_FORM_INTERACTION_TIME;
   }
 
   /**
@@ -237,8 +273,32 @@ export class AntiAbuseProtection {
    * @returns true if environment seems legitimate, false if suspicious
    */
   static validateEnvironment(): boolean {
-    // TODO: Implement in subtask 51.3
-    throw new Error('Not implemented: validateEnvironment will be implemented in subtask 51.3');
+    // Check for essential browser objects
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    if (typeof navigator === 'undefined') {
+      return false;
+    }
+
+    if (typeof document === 'undefined') {
+      return false;
+    }
+
+    // Check for common bot indicators (missing properties)
+    if (!navigator.userAgent) {
+      return false;
+    }
+
+    // Check for basic browser features
+    if (typeof localStorage === 'undefined') {
+      // Note: We still allow this case for graceful degradation
+      // but it's a minor red flag
+    }
+
+    // Environment appears legitimate
+    return true;
   }
 
   /**
@@ -247,8 +307,39 @@ export class AntiAbuseProtection {
    * @returns true if user agent appears legitimate, false if suspicious
    */
   static validateUserAgent(): boolean {
-    // TODO: Implement in subtask 51.3
-    throw new Error('Not implemented: validateUserAgent will be implemented in subtask 51.3');
+    if (typeof navigator === 'undefined' || !navigator.userAgent) {
+      return false;
+    }
+
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    // Common bot patterns to detect
+    const botPatterns = [
+      'bot',
+      'crawler',
+      'spider',
+      'scraper',
+      'curl',
+      'wget',
+      'python',
+      'java/',
+      'http',
+      'axios',
+      'okhttp',
+      'scrapy',
+      'phantomjs',
+      'headless',
+    ];
+
+    // Check if user agent contains any bot patterns
+    for (const pattern of botPatterns) {
+      if (userAgent.includes(pattern)) {
+        return false;
+      }
+    }
+
+    // User agent appears legitimate
+    return true;
   }
 
   // ============================================================
