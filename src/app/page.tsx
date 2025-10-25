@@ -15,6 +15,7 @@ import {
   RateLimitWarning,
   BlockedRequestFeedback,
 } from '@/components/anti-abuse';
+import { UsageInfoTooltip } from '@/components/usage-info-tooltip';
 
 export default function Home() {
   const [url, setUrl] = useState('');
@@ -197,13 +198,13 @@ export default function Home() {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header with Theme Toggle */}
         <header className="flex items-start justify-between gap-4">
-          <div className="flex-1 text-center space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              JW Content Extractor
-            </h1>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              Extract clean Markdown content from jw.org and wol.jw.org articles
-            </p>
+          <div className="flex-1 text-center">
+            <div className="flex items-center justify-center gap-2">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                JW Content Extractor
+              </h1>
+              <UsageInfoTooltip />
+            </div>
           </div>
           <ThemeToggle />
         </header>
