@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { X, Download, Copy, Check, Loader2 } from 'lucide-react';
+import { X, Download, Copy, Check, Loader2, ExternalLink } from 'lucide-react';
 import { extractContent } from './actions/extract-content';
 import { toast } from 'sonner';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -211,9 +211,20 @@ export default function Home() {
 
         {/* URL Input Section */}
         <section className="space-y-2" aria-labelledby="url-input-label">
-          <label id="url-input-label" htmlFor="url-input" className="text-sm font-medium">
-            Article URL
-          </label>
+          <div className="flex items-center gap-2">
+            <label id="url-input-label" htmlFor="url-input" className="text-sm font-medium">
+              Article URL
+            </label>
+            <a
+              href="https://wol.jw.org/de/wol/h/r10/lp-x"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Browse JW Library"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </div>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Input
