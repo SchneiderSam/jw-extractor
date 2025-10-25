@@ -101,11 +101,155 @@
         ],
         "status": "done",
         "subtasks": []
+      },
+      {
+        "id": 47,
+        "title": "Setup Next.js 15+ Project with Core Dependencies and Basic UI Structure",
+        "description": "Initialize the Next.js project with App Router, TypeScript, and all required dependencies including Shadcn UI components, then create the basic page structure with URL input field and extraction button.",
+        "details": "1. Create Next.js 15+ project with App Router and TypeScript: `npx create-next-app@latest jw-content-extractor --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\"`\n2. Install core dependencies: `npm install @radix-ui/react-toast @radix-ui/react-skeleton lucide-react next-themes turndown cheerio @types/cheerio @types/turndown`\n3. Setup Shadcn UI: `npx shadcn-ui@latest init` and install components: `npx shadcn-ui@latest add input textarea button toast skeleton`\n4. Create main page structure in `app/page.tsx` with:\n   - Clean input field for URL entry with Shadcn Input component\n   - Extract button using Shadcn Button component\n   - Placeholder for Markdown display area using Shadcn Textarea\n   - Basic responsive layout with Tailwind CSS\n5. Implement URL validation regex for jw.org and wol.jw.org domains\n6. Add clear button functionality to reset input field\n7. Setup basic error state management with React useState\n8. Configure TypeScript interfaces for ExtractionRequest and ExtractionResult as specified in PRD",
+        "testStrategy": "1. Verify project builds without errors using `npm run build`\n2. Test URL validation with valid jw.org/wol.jw.org URLs and invalid URLs\n3. Verify clear button resets input field\n4. Test responsive design on mobile and desktop viewports\n5. Ensure all Shadcn components render correctly\n6. Validate TypeScript compilation with no type errors",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 48,
+        "title": "Implement Server Action for Content Extraction and HTML to Markdown Conversion",
+        "description": "Create the core server action that fetches content from JW.org URLs, extracts the content div, and converts HTML to clean Markdown format using Cheerio and Turndown.js with custom rules.",
+        "details": "1. Create server action `app/actions/extractContent.ts` with 'use server' directive\n2. Implement URL validation for jw.org and wol.jw.org domains using regex\n3. Use native fetch API to retrieve HTML content with proper headers:\n   ```typescript\n   const response = await fetch(url, {\n     headers: {\n       'User-Agent': 'Mozilla/5.0 (compatible; JW Content Extractor)'\n     }\n   });\n   ```\n4. Parse HTML using Cheerio to extract `<div id=\"content\" class=\"content\">` element\n5. Configure Turndown.js with custom rules for JW.org specific elements:\n   - Question boxes (div.questionBox or similar)\n   - Scripture citations\n   - Preserve headings, lists, quotes, and paragraph formatting\n   - Ignore headers, sidebars, footers, navigation elements\n6. Implement comprehensive error handling for three scenarios:\n   - Invalid URL format\n   - Content div not found (return CONTENT_NOT_FOUND error)\n   - Network/fetch errors (return NETWORK_ERROR error)\n7. Return ExtractionResult interface with success boolean and markdown/error data\n8. Add fallback selectors for content extraction in case HTML structure changes",
+        "testStrategy": "1. Test with various jw.org and wol.jw.org article URLs to verify content extraction\n2. Verify Markdown output preserves headings, lists, quotes, and paragraphs correctly\n3. Test error handling with invalid URLs, unreachable URLs, and pages without content div\n4. Validate that headers, sidebars, and navigation elements are properly excluded\n5. Test with articles containing question boxes and special JW.org formatting\n6. Verify server action returns proper ExtractionResult format\n7. Test with different locales (en, es, fr, etc.) to ensure broad compatibility",
+        "priority": "high",
+        "dependencies": [
+          47
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 49,
+        "title": "Integrate UI with Server Action and Implement User Feedback Features",
+        "description": "Connect the UI components with the server action, implement loading states with skeleton loader, error handling with specific messages, and copy-to-clipboard functionality with toast notifications.",
+        "details": "1. Wire up form submission to call extractContent server action using useTransition hook for loading state\n2. Implement pulsing skeleton loader using Shadcn Skeleton component during content extraction\n3. Display extracted Markdown in editable Shadcn Textarea component\n4. Add specific error message handling for three error types:\n   - 'Invalid URL format. Please enter a valid jw.org or wol.jw.org link.'\n   - 'Content could not be loaded. The page structure may have changed.'\n   - 'The page is not reachable. Please check your internet connection.'\n5. Implement copy-to-clipboard functionality using Navigator Clipboard API:\n   ```typescript\n   await navigator.clipboard.writeText(markdown);\n   ```\n6. Add toast notifications using Shadcn Toast/Sonner for copy confirmation\n7. Include Lucide icons for visual clarity (Copy icon for copy button, Clear icon for clear button)\n8. Implement form validation to prevent submission of empty or invalid URLs\n9. Add loading state management to disable buttons during extraction\n10. Ensure textarea is editable so users can modify Markdown before copying\n11. Add proper error boundaries and fallback UI states",
+        "testStrategy": "1. Test complete user flow: paste URL → extract → view Markdown → copy → toast confirmation\n2. Verify skeleton loader appears during extraction and disappears when complete\n3. Test all three error scenarios and verify correct error messages display\n4. Test copy-to-clipboard functionality across different browsers\n5. Verify toast notifications appear and disappear correctly\n6. Test form validation prevents submission of invalid URLs\n7. Ensure buttons are properly disabled during loading states\n8. Test textarea editing functionality works correctly\n9. Verify responsive behavior on mobile and desktop devices\n10. Test keyboard navigation and accessibility features",
+        "priority": "medium",
+        "dependencies": [
+          48
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 50,
+        "title": "Add Developer Footer Component",
+        "description": "Create a simple, minimalist footer component that displays developer attribution and is always visible at the bottom of the page with responsive design and theme support.",
+        "details": "1. Create `src/components/footer.tsx` as a React component using semantic HTML `<footer>` tag\n2. Implement sticky footer positioning using Tailwind CSS classes: `fixed bottom-0 left-0 right-0` or `sticky top-full`\n3. Add responsive design with mobile-first approach:\n   ```tsx\n   <footer className=\"fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-border\">\n     <div className=\"container mx-auto px-4 py-2\">\n       <p className=\"text-xs text-muted-foreground text-center\">\n         Built by <a href=\"#\" className=\"hover:text-foreground transition-colors\">Developer Name</a>\n       </p>\n     </div>\n   </footer>\n   ```\n4. Integrate with next-themes for automatic light/dark theme support using CSS variables: `bg-background`, `text-muted-foreground`, `border-border`\n5. Ensure minimal height (e.g., 40-48px) to avoid taking up too much screen space\n6. Add subtle backdrop blur and transparency for modern look: `bg-background/80 backdrop-blur-sm`\n7. Import and add footer component to main layout in `src/app/layout.tsx` below the main content area\n8. Add bottom padding to main content area to prevent footer overlap: `pb-12` or `pb-16`\n9. Use hover effects for developer link with smooth transitions\n10. Ensure footer doesn't interfere with main content scrolling or interactions",
+        "testStrategy": "1. Verify footer renders correctly on both mobile (320px+) and desktop (1024px+) viewports\n2. Test footer positioning remains at bottom of viewport when content is short and doesn't overlap when content is long\n3. Validate theme switching between light and dark modes shows appropriate colors and contrast\n4. Test footer backdrop blur and transparency effects work correctly\n5. Verify developer link hover states and transitions function smoothly\n6. Check that main content has adequate bottom padding to prevent footer overlap\n7. Test footer accessibility with keyboard navigation and screen readers\n8. Validate footer doesn't interfere with scrolling behavior or other UI interactions\n9. Ensure footer text remains readable at different zoom levels (100%-200%)\n10. Test footer appearance consistency across different browsers (Chrome, Firefox, Safari)",
+        "status": "pending",
+        "dependencies": [
+          47
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 51,
+        "title": "Implement Anti-Abuse Protection (Client-Side Only)",
+        "description": "Add comprehensive client-side anti-abuse protection mechanisms including rate limiting, bot detection, request delays, and browser fingerprint checks to prevent spam and excessive requests without external API dependencies.",
+        "details": "1. Create `src/lib/anti-abuse.ts` utility file with core protection functions:\n   ```typescript\n   interface RateLimitState {\n     requests: number[];\n     lastRequest: number;\n   }\n   \n   export class AntiAbuseProtection {\n     private static RATE_LIMIT_KEY = 'jw_extractor_rate_limit';\n     private static MAX_REQUESTS = 10;\n     private static TIME_WINDOW = 60000; // 1 minute\n     private static MIN_REQUEST_DELAY = 2500; // 2.5 seconds\n   \n     static checkRateLimit(): { allowed: boolean; remainingTime?: number } {\n       // localStorage-based rate limiting logic\n     }\n   \n     static detectBot(): boolean {\n       // Bot detection checks\n     }\n   \n     static validateFormTiming(startTime: number): boolean {\n       // Form submission timing validation\n     }\n   }\n   ```\n\n2. Implement rate limiting with localStorage:\n   - Track request timestamps in array format\n   - Clean expired entries automatically\n   - Calculate remaining cooldown time\n   - Provide visual feedback with countdown timer\n\n3. Add bot detection mechanisms:\n   - Create invisible honeypot input field with `display: none` and `tabindex=\"-1\"`\n   - Validate JavaScript environment (window, navigator objects)\n   - Check for suspicious user agent patterns\n   - Validate minimum form interaction time (reject submissions under 1 second)\n\n4. Implement request delay enforcement:\n   - Track last request timestamp in localStorage\n   - Disable extract button during cooldown\n   - Show real-time countdown timer component\n   - Auto-enable button after delay period\n\n5. Update main page component (`src/app/page.tsx`):\n   - Add honeypot field to form\n   - Integrate rate limiting checks before extraction\n   - Add cooldown timer display component\n   - Show appropriate error messages for blocked requests\n\n6. Create supporting UI components:\n   - Cooldown timer component with seconds remaining\n   - Rate limit warning messages\n   - Visual feedback for blocked requests\n\n7. Implement graceful degradation:\n   - Fallback behavior when localStorage unavailable\n   - Progressive enhancement approach\n   - Maintain core functionality without anti-abuse features",
+        "testStrategy": "1. Test rate limiting functionality:\n   - Verify 10 requests per minute limit enforcement\n   - Test localStorage persistence across browser sessions\n   - Validate automatic cleanup of expired entries\n   - Test countdown timer accuracy and display\n\n2. Test bot detection mechanisms:\n   - Verify honeypot field rejection (fill hidden field and submit)\n   - Test JavaScript environment validation\n   - Validate form timing checks (submit immediately vs normal timing)\n   - Test user agent pattern detection with common bot signatures\n\n3. Test request delay enforcement:\n   - Verify minimum 2.5 second delay between requests\n   - Test button disable/enable states during cooldown\n   - Validate countdown timer updates every second\n   - Test multiple rapid submission attempts\n\n4. Test localStorage edge cases:\n   - Test behavior when localStorage is disabled/unavailable\n   - Verify graceful degradation maintains core functionality\n   - Test with corrupted localStorage data\n   - Validate cleanup of malformed rate limit data\n\n5. Test user experience:\n   - Verify clear error messages for rate limit violations\n   - Test visual feedback during cooldown periods\n   - Validate accessibility of timer and warning components\n   - Test responsive design of anti-abuse UI elements\n\n6. Integration testing:\n   - Test anti-abuse protection with actual content extraction flow\n   - Verify protection doesn't interfere with legitimate usage\n   - Test combination of multiple protection mechanisms\n   - Validate error handling when protection checks fail",
+        "status": "pending",
+        "dependencies": [
+          47,
+          49
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Core Anti-Abuse Utility File with TypeScript Types",
+            "description": "Create the foundational anti-abuse utility file with TypeScript interfaces and class structure for rate limiting, bot detection, and request delay enforcement.",
+            "dependencies": [],
+            "details": "Create `src/lib/anti-abuse.ts` with RateLimitState interface, AntiAbuseProtection class, and static constants (RATE_LIMIT_KEY, MAX_REQUESTS=10, TIME_WINDOW=60000ms, MIN_REQUEST_DELAY=2500ms). Include method signatures for checkRateLimit(), detectBot(), and validateFormTiming() with proper TypeScript return types.\n<info added on 2025-10-25T10:44:04.142Z>\n✅ **COMPLETED** - Core anti-abuse utility file successfully created with comprehensive TypeScript foundation.\n\n**File Created:** `src/lib/anti-abuse.ts`\n\n**Key Achievements:**\n- Complete TypeScript interface definitions (RateLimitState, RateLimitResult, BotDetectionResult)\n- Static AntiAbuseProtection class with all required method signatures\n- All constants properly defined and documented\n- 9 methods with placeholder implementations and clear TODO comments\n- Full JSDoc documentation throughout\n- Type-safe implementation with proper return types\n- Zero linter errors\n\n**Enhanced Features Added:**\n- Additional utility methods (clearProtectionData, now, isLocalStorageAvailable)\n- Extended bot detection capabilities with validateEnvironment and validateUserAgent\n- Comprehensive error handling structure\n- Ready-to-implement method stubs for all subsequent subtasks\n\n**Status:** Ready for implementation phase - all subsequent subtasks can now proceed with their specific method implementations.\n</info added on 2025-10-25T10:44:04.142Z>",
+            "status": "done",
+            "testStrategy": "Unit tests for class instantiation, constant values, method signatures, and TypeScript type checking. Verify all interfaces and types are properly exported."
+          },
+          {
+            "id": 2,
+            "title": "Implement Rate Limiting with localStorage Persistence",
+            "description": "Implement the rate limiting logic using localStorage to track request timestamps and enforce the 10 requests per minute limit with automatic cleanup.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement checkRateLimit() method that stores request timestamps in localStorage array, automatically removes expired entries older than TIME_WINDOW, enforces MAX_REQUESTS limit, and returns {allowed: boolean, remainingTime?: number}. Include error handling for localStorage unavailability.\n<info added on 2025-10-25T10:45:21.764Z>\n✅ Successfully implemented Rate Limiting with localStorage Persistence\n\n**Implementation Details:**\n\n1. **checkRateLimit() Method:**\n   - Graceful degradation: Returns `allowed: true` if localStorage unavailable\n   - Loads current rate limit state from localStorage\n   - Automatically cleans up expired entries (older than TIME_WINDOW = 60 seconds)\n   - **Check #1:** Enforces MAX_REQUESTS (10) per TIME_WINDOW\n     - If limit reached: Calculates remainingTime until oldest request expires\n   - **Check #2:** Enforces MIN_REQUEST_DELAY (2500ms) between consecutive requests\n     - If too soon: Calculates remainingTime until delay period expires\n   - Returns RateLimitResult with:\n     - `allowed: boolean`\n     - `remainingTime?: number` (milliseconds until next request allowed)\n     - `requestCount?: number` (current number of requests in window)\n\n2. **recordRequest() Method:**\n   - Graceful degradation: Silently skips if localStorage unavailable\n   - Adds current timestamp to requests array\n   - Updates lastRequest timestamp\n   - Automatically cleans up expired entries before saving\n   - Persists updated state to localStorage\n\n3. **Private Helper Methods Added:**\n   - **getRateLimitState():** Loads state from localStorage with validation\n     - Returns default state `{ requests: [], lastRequest: 0 }` if not found\n     - Handles corrupted data gracefully with try-catch\n     - Validates data structure before returning\n   - **saveRateLimitState(state):** Persists state to localStorage\n     - Try-catch error handling for quota exceeded errors\n     - Console warning on failure (non-blocking)\n\n4. **Features Implemented:**\n   - ✅ localStorage-based persistence across sessions\n   - ✅ Automatic cleanup of expired entries\n   - ✅ Dual enforcement (rate limit + minimum delay)\n   - ✅ Accurate remainingTime calculations\n   - ✅ Graceful degradation when localStorage unavailable\n   - ✅ Robust error handling for corrupted data\n   - ✅ Request count tracking for UI feedback\n\n5. **Edge Cases Handled:**\n   - localStorage disabled/unavailable\n   - Corrupted localStorage data\n   - localStorage quota exceeded\n   - Missing or invalid state structure\n   - First-time usage (no existing state)\n\n**Testing Scenarios Covered:**\n- Rate limit enforcement after 10 requests\n- Minimum delay enforcement between requests\n- Automatic cleanup after TIME_WINDOW expires\n- Graceful fallback when localStorage unavailable\n- State persistence across page reloads\n</info added on 2025-10-25T10:45:21.764Z>",
+            "status": "done",
+            "testStrategy": "Test rate limit enforcement with 10+ requests, verify localStorage persistence across page reloads, test automatic cleanup of expired entries, and validate remainingTime calculations. Test fallback behavior when localStorage is disabled."
+          },
+          {
+            "id": 3,
+            "title": "Implement Bot Detection Mechanisms",
+            "description": "Create comprehensive bot detection including honeypot validation, JavaScript environment checks, user agent analysis, and form timing validation.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement detectBot() method with checks for: honeypot field interaction (should be empty), JavaScript environment validation (window/navigator objects), suspicious user agent patterns, and validateFormTiming() method to reject submissions under 1 second. Return boolean indicating bot detection status.",
+            "status": "pending",
+            "testStrategy": "Test honeypot field detection with filled vs empty values, verify JavaScript environment checks work in different browsers, test user agent pattern matching, and validate form timing with submissions under/over 1 second threshold."
+          },
+          {
+            "id": 4,
+            "title": "Implement Request Delay Enforcement with Countdown Logic",
+            "description": "Create request delay enforcement system that tracks last request timestamp and calculates remaining cooldown time for UI feedback.",
+            "dependencies": [
+              1
+            ],
+            "details": "Extend AntiAbuseProtection class with methods to track last request timestamp in localStorage, calculate remaining delay time based on MIN_REQUEST_DELAY, and provide real-time countdown functionality. Include methods for checking if delay period has passed and getting remaining seconds.",
+            "status": "pending",
+            "testStrategy": "Test delay enforcement by making rapid requests, verify countdown timer accuracy with real-time updates, test localStorage persistence of last request timestamp, and validate automatic re-enabling after delay period expires."
+          },
+          {
+            "id": 5,
+            "title": "Create UI Components for Visual Feedback",
+            "description": "Build React components for cooldown timer display, rate limit warnings, and visual feedback for blocked requests with proper styling and accessibility.",
+            "dependencies": [
+              4
+            ],
+            "details": "Create CooldownTimer component showing seconds remaining with real-time updates, RateLimitWarning component for displaying rate limit messages, and BlockedRequestFeedback component for visual indication of blocked requests. Use Shadcn UI components for consistent styling and include proper ARIA labels for accessibility.",
+            "status": "pending",
+            "testStrategy": "Test timer component updates every second accurately, verify warning messages display correctly for different scenarios, test accessibility with screen readers, and validate responsive design across different screen sizes."
+          },
+          {
+            "id": 6,
+            "title": "Integrate Anti-Abuse Protection into Main Page Component",
+            "description": "Integrate all anti-abuse mechanisms into the main page component including honeypot field, rate limiting checks, and UI feedback components.",
+            "dependencies": [
+              2,
+              3,
+              5
+            ],
+            "details": "Update `src/app/page.tsx` to add invisible honeypot input field with proper styling (display: none, tabindex: -1), integrate rate limiting checks before form submission, add cooldown timer and warning components, implement form timing tracking, and show appropriate error messages for different blocking scenarios.",
+            "status": "pending",
+            "testStrategy": "Test complete user flow with anti-abuse protection active, verify honeypot field is invisible and properly positioned, test rate limiting integration with form submission, validate error message display for blocked requests, and test graceful degradation when localStorage is unavailable."
+          }
+        ]
+      },
+      {
+        "id": 52,
+        "title": "Add Usage Info Tooltip Component",
+        "description": "Create an informative tooltip with an info icon that explains how to use the extracted Markdown content with AI assistants, featuring responsive behavior and accessibility compliance.",
+        "details": "1. Install Shadcn Tooltip component if not already present: `npx shadcn-ui@latest add tooltip`\n2. Create `src/components/usage-info-tooltip.tsx` as a React component:\n   ```tsx\n   import { Info } from 'lucide-react';\n   import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';\n   \n   export function UsageInfoTooltip() {\n     return (\n       <TooltipProvider>\n         <Tooltip>\n           <TooltipTrigger asChild>\n             <button \n               className=\"inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2\"\n               aria-label=\"Usage information\"\n             >\n               <Info className=\"w-4 h-4 text-muted-foreground\" />\n             </button>\n           </TooltipTrigger>\n           <TooltipContent side=\"bottom\" className=\"max-w-xs p-3\">\n             <div className=\"space-y-2\">\n               <p className=\"font-medium\">Extract JW.org articles as Markdown</p>\n               <p className=\"text-sm text-muted-foreground\">Perfect for AI assistants like ChatGPT, Claude, or Cursor</p>\n               <p className=\"text-xs text-muted-foreground\">Use extracted content as context for deeper analysis</p>\n             </div>\n           </TooltipContent>\n         </Tooltip>\n       </TooltipProvider>\n     );\n   }\n   ```\n3. Position tooltip next to page title or URL input in main page component\n4. Implement responsive behavior using CSS media queries or Tailwind responsive classes\n5. Add proper ARIA attributes for accessibility: `aria-label`, `aria-describedby`\n6. Configure tooltip positioning to avoid viewport edges using Radix UI's collision detection\n7. Ensure keyboard navigation works with Tab, Enter, and Space keys\n8. Test theme compatibility with both light and dark modes\n9. Add smooth animations using Tailwind transition classes\n10. Implement mobile-specific behavior (click to show/hide) vs desktop hover behavior",
+        "testStrategy": "1. Test tooltip functionality across devices:\n   - Desktop: Verify hover shows tooltip, mouse leave hides it\n   - Mobile: Verify tap shows tooltip, tap outside closes it\n   - Tablet: Test both touch and hover interactions\n\n2. Test accessibility compliance:\n   - Navigate to tooltip using Tab key and verify focus ring appears\n   - Press Enter/Space when focused and verify tooltip toggles\n   - Test with screen reader to ensure ARIA labels are announced\n   - Verify color contrast ratios meet WCAG 2.1 AA standards\n\n3. Test responsive design:\n   - Verify tooltip content is readable on small screens (320px+)\n   - Test tooltip positioning near viewport edges\n   - Ensure tooltip doesn't overflow or get cut off\n\n4. Test theme compatibility:\n   - Switch between light and dark themes\n   - Verify tooltip background, text, and icon colors update correctly\n   - Test focus states in both themes\n\n5. Test integration:\n   - Verify tooltip appears in correct position relative to page title/URL input\n   - Test that tooltip doesn't interfere with other UI interactions\n   - Validate smooth animations during show/hide transitions",
+        "status": "pending",
+        "dependencies": [
+          47
+        ],
+        "priority": "low",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-10-06T12:17:42.313Z",
-      "updated": "2025-10-24T05:01:51.735Z",
+      "updated": "2025-10-25T10:45:26.534Z",
       "description": "Tasks for master context"
     }
   }

@@ -239,6 +239,59 @@ async function extractContent(url: string): Promise<ExtractionResult>
 6. Add simple analytics (optional)
 7. Final cross-browser testing
 
+## Phase 6: Additional Features
+**Goal:** Add developer attribution, anti-abuse protection, and usage guidance
+
+### Features:
+
+#### 1. Developer Footer
+- Simple, minimalist footer component always visible at bottom of page
+- Display developer attribution (name/link)
+- Responsive design that works on mobile and desktop
+- Styled to match both light and dark themes
+- Non-intrusive, subtle design
+
+#### 2. Anti-Abuse Protection (Client-Side Only)
+- **Rate Limiting:** localStorage-based request throttling
+  - Maximum 10 requests per minute per client
+  - Visual feedback when limit is reached
+  - Automatic cooldown timer display
+- **Simple Bot Detection:**
+  - Honeypot field (invisible input that bots fill)
+  - Basic JavaScript checks (window object, navigator)
+- **Request Delay Enforcement:**
+  - Minimum 2-3 seconds between consecutive requests
+  - Disable extract button during cooldown
+  - Show countdown timer to user
+- **Browser Fingerprint Checks:**
+  - Verify JavaScript is enabled
+  - Check for common bot user agents
+  - Validate form submission timing (too fast = suspicious)
+
+#### 3. Usage Info Tooltip
+- Info icon (ⓘ) next to page title or URL input
+- Hover/click to show tooltip with usage guidance
+- Explain the Markdown → AI Context workflow:
+  - "Extract JW.org articles as Markdown"
+  - "Perfect for AI assistants like ChatGPT, Claude, or Cursor"
+  - "Use extracted content as context for deeper analysis"
+- Smooth animation and accessible keyboard navigation
+- Styled with Shadcn Tooltip component
+- Responsive design (click on mobile, hover on desktop)
+
+### Implementation Notes:
+- All anti-abuse features are **client-side only** (no external APIs)
+- localStorage for rate limiting persistence across sessions
+- Graceful degradation if localStorage is unavailable
+- Clear user feedback for all protective measures
+- Developer footer should be semantic HTML (`<footer>` tag)
+- Tooltip should be accessible (ARIA labels, keyboard support)
+
+### Dependencies:
+- Phase 1-3 must be complete (basic functionality)
+- Phase 4 (Dark mode) recommended for proper footer styling
+- No external dependencies required for anti-abuse features
+
 # Logical Dependency Chain
 
 **Foundation (Must be built first):**
